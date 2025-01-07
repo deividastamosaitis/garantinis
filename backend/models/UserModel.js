@@ -11,6 +11,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    vardas: {
+      type: String,
+    },
+    pavarde: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

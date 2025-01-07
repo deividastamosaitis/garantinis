@@ -2,6 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import { garantinisRoutes } from "./routes/garantinisRoutes.js";
 import { usersRoutes } from "./routes/usersRoutes.js";
+import { klientasRoutes } from "./routes/klientasRoutes.js";
+import { pardavimasRoutes } from "./routes/pardavimasRoutes.js";
 
 const app = express();
 
@@ -9,6 +11,8 @@ app.use(express.json());
 
 app.use("/api/garantinis", garantinisRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/klientas", klientasRoutes);
+app.use("/api/pardavimas", pardavimasRoutes);
 
 mongoose
   .connect(

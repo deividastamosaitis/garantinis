@@ -1,17 +1,22 @@
 import mongoose from "mongoose";
 
-const PrekeSchema = new mongoose.Schema(
+const PardavimasSchema = new mongoose.Schema(
   {
-    user: {
+    preke: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User",
+      ref: "Preke",
     },
     barkodas: {
       type: String,
       required: true,
     },
-    pavadinimas: {
+    serial: {
+      type: String,
+      required: true,
+      default: "1",
+    },
+    tipas: {
       type: String,
       required: true,
     },
@@ -23,6 +28,6 @@ const PrekeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Preke = mongoose.model("Preke", PrekeSchema);
+const Pardavimas = mongoose.model("Pardavimas", PardavimasSchema);
 
-export default Preke;
+export default Pardavimas;
