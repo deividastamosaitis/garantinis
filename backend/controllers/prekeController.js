@@ -15,10 +15,10 @@ const getPrekes = async (req, res) => {
 /*******************Prekes sukurimas */
 const addPreke = async (req, res) => {
   //pasiimam data is body
-  const { pavadinimas, kaina, barkodas } = req.body;
+  const { pavadinimas, barkodas } = req.body;
 
   //tikrinam ar nera neuzpildytu vietu
-  if (!pavadinimas || !kaina || !barkodas) {
+  if (!pavadinimas || !barkodas) {
     return res.status(400).json({ error: "Neuzpildyta pilnai forma" });
   }
 
@@ -29,7 +29,6 @@ const addPreke = async (req, res) => {
     const preke = await Preke.create({
       user: user._id,
       pavadinimas,
-      kaina,
       barkodas,
     });
     res.status(200).json({ msg: "Prekė pridėta", preke });
@@ -93,7 +92,7 @@ const updatePreke = async (req, res) => {
   }
 
   try {
-    await preke.updateOne({ pavadinimas, kaina });
+    await preke.updateOne({ pavadinimas, barkodas });
     res.status(200).json({ msg: "Prekė atnaujinta" });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -15,10 +15,6 @@ const PrekeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    kaina: {
-      type: String,
-      required: true,
-    },
   },
   { timestamps: true }
 );
