@@ -35,8 +35,8 @@ const Layout = () => {
         aria-label="Sidebar"
       >
         <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-          <Link to="/" className="flex items-center ps-2.5 mb-5">
-            <img src="logo.png" class="h-6 me-3 sm:h-7" alt="Flowbite Logo" />
+          <Link to="/garantinis/" className="flex items-center ps-2.5 mb-5">
+            <img src="logo.png" class="h-6 me-3 sm:h-7" alt="GPSLogo" />
             <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
               Garantinis
             </span>
@@ -44,7 +44,7 @@ const Layout = () => {
           <ul class="space-y-2 font-medium">
             <li>
               <Link
-                to="/"
+                to="/garantinis/pildyti"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <i class="fa-solid fa-pen-to-square w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
@@ -53,7 +53,7 @@ const Layout = () => {
             </li>
             <li>
               <Link
-                to="/d_statistika"
+                to="/garantinis/d_statistika"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <i class="fa-solid fa-chart-simple flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
@@ -95,7 +95,7 @@ const Layout = () => {
               <ul id="statistika-admin" class="hidden py-2 space-y-2">
                 <li>
                   <Link
-                    to="/k_statistika"
+                    to="/garantinis/k_statistika"
                     class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                   >
                     Klientų
@@ -103,7 +103,7 @@ const Layout = () => {
                 </li>
                 <li>
                   <Link
-                    to="/p_statistika"
+                    to="/garantinis/p_statistika"
                     class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                   >
                     Prekių
@@ -111,7 +111,7 @@ const Layout = () => {
                 </li>
                 <li>
                   <Link
-                    to="/b_statistika"
+                    to="/garantinis/b_statistika"
                     class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                   >
                     Bendra
@@ -121,7 +121,7 @@ const Layout = () => {
             </li>
             <li>
               <Link
-                to="/klientai"
+                to="/garantinis/klientai"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-user"></i>
@@ -130,7 +130,7 @@ const Layout = () => {
             </li>
             <li>
               <Link
-                to="/prekes"
+                to="/garantinis/prekes"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-tag"></i>

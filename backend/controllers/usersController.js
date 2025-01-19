@@ -11,10 +11,10 @@ const createToken = (_id) => {
 /*******************Registraacija */
 const registerUser = async (req, res) => {
   //imam data is body
-  const { email, password } = req.body;
+  const { email, password, vardas, pavarde } = req.body;
 
   //tikrinam ar pilnai uzpilde
-  if (!email || !password) {
+  if (!email || !password || !vardas || !pavarde) {
     return res.status(400).json({ error: "Visi langai turi buti uzpildyti" });
   }
 
@@ -30,11 +30,16 @@ const registerUser = async (req, res) => {
 
   try {
     //registruoti user
-    const user = await User.create({ email, password: hashed });
+    const user = await User.create({
+      email,
+      password: hashed,
+      vardas,
+      pavarde,
+    });
     //kuriam jwt
     const token = createToken(user._id);
     //atsakymas
-    res.status(200).json({ email, token });
+    res.status(200).json({ email, token, vardas, pavarde });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

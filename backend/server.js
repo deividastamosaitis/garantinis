@@ -21,6 +21,6 @@ mongoose
   )
   .then(() => {
     console.log("Prisijungta prie mongodb sekmingai");
-    app.listen(4000, "localhost", () => console.log("listening to port 4000"));
+    app.listen(5100, () => console.log("listening to port 5100"));
   })
   .catch((err) => console.log(err));
