@@ -19,12 +19,18 @@ import BStatistika from "./pages/garantiniai/BStatistika";
 import KStatistika from "./pages/garantiniai/KStatistika";
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
+import { loader as allPrekesLoader } from "./pages/Prekes";
+import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
     children: [
+      {
+        index: true,
+        element: <Landing />,
+      },
       {
         path: "register",
         element: <Register />,
@@ -46,10 +52,6 @@ const router = createBrowserRouter([
             element: <Klientai />,
           },
           {
-            path: "prekes",
-            element: <Prekes />,
-          },
-          {
             path: "k_statistika",
             element: <KStatistika />,
           },
@@ -60,6 +62,11 @@ const router = createBrowserRouter([
           {
             path: "b_statistika",
             element: <BStatistika />,
+          },
+          {
+            path: "prekes",
+            element: <Prekes />,
+            loader: allPrekesLoader,
           },
         ],
       },

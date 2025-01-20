@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Alert from "../../components/Alert";
 import { Form, redirect, useNavigation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import customFetch from "../../utils/customFetch.js";
@@ -8,7 +7,7 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
   try {
-    await customFetch.post("/users/login", data);
+    await customFetch.post("/auth/login", data);
     toast.success("Prisijungta");
     return redirect("/garantinis");
   } catch (error) {

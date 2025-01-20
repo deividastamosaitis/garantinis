@@ -1,4 +1,5 @@
 import User from "../models/UserModel.js";
+import Prekes from "../models/PrekeModel.js";
 import { StatusCodes } from "http-status-codes";
 import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
 import { UnauthenticatedError } from "../errors/customErrors.js";
@@ -34,4 +35,14 @@ const loginUser = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Vartotojas prisijunge" });
 };
 
-export { registerUser, loginUser };
+/************* LOGOUT */
+
+const logout = async (req, res) => {
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).json({ msg: "Vartotojas atsijungė" });
+};
+
+export { registerUser, loginUser, logout };

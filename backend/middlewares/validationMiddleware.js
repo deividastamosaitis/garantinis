@@ -7,6 +7,7 @@ import {
 } from "../errors/customErrors.js";
 import { PREKE_KATEGORIJA } from "../utils/constants.js";
 import mongoose from "mongoose";
+import Prekes from "../models/PrekeModel.js";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -18,7 +19,7 @@ const withValidationErrors = (validateValues) => {
 
         const firstMessage = errorMessages[0];
         console.log(Object.getPrototypeOf(firstMessage));
-        if (errorMessages[0].startsWith("no job")) {
+        if (errorMessages[0].startsWith("Tokios prekės")) {
           throw new NotFoundError(errorMessages);
         }
         if (errorMessages[0].startsWith("not authorized")) {
@@ -71,7 +72,31 @@ export const validatePrekeInput = withValidationErrors([
 ]);
 
 export const validateIdParam = withValidationErrors([
-  param("id")
-    .custom((value) => mongoose.Types.ObjectId.isValid(value))
-    .withMessage("Blogas MongoDB id"),
+  param("id").custom(async (value) => {
+    const isValidId = mongoose.Types.ObjectId.isValid(value);
+    if (!isValidId) throw new BadRequestError("Blogas MongoDB id");
+    const preke = await Prekes.findById(value);
+    if (!preke)
+      throw new NotFoundError(`Tokios prekės su šiuo id: ${value} nėra`);
+
+    // const isAdmin = req.user.role === "admin";
+    // if (!isAdmin)
+    //   throw new UnauthorizedError("not autorized to access this route");
+  }),
+]);
+
+export const validateUpdateUserInput = withValidationErrors([
+  body("vardas").notEmpty().withMessage("Būtinas vardas"),
+  body("email")
+    .notEmpty()
+    .withMessage("Būtinas el.paštas")
+    .isEmail()
+    .withMessage("Neteisingas el.paštas")
+    .custom(async (email, { req }) => {
+      const user = await User.findOne({ email });
+      if (user && user._id.toString() !== req.user.userId) {
+        throw new BadRequestError("Toks el.pastas jau yra");
+      }
+    }),
+  body("pavarde").notEmpty().withMessage("Butina pavarde"),
 ]);

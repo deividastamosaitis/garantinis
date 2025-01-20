@@ -8,10 +8,12 @@ import cookieParser from "cookie-parser";
 
 //routers
 import PrekeRouter from "./routes/prekeRouter.js";
-import { usersRoutes } from "./routes/usersRoutes.js";
+import { authRouter } from "./routes/authRouter.js";
+import { userRouter } from "./routes/userRouter.js";
 
 //middleware
 import errorHandlerMiddleware from "./middlewares/errorHandlerMiddleware.js";
+import { authenticateUser } from "./middlewares/authMiddleware.js";
 
 const app = express();
 
@@ -22,8 +24,9 @@ if (process.env.NODE_ENV === "development") {
 app.use(cookieParser());
 app.use(express.json());
 
-app.use("/api/users", usersRoutes);
-app.use("/api/prekes", PrekeRouter);
+app.use("/api/prekes", authenticateUser, PrekeRouter);
+app.use("/api/users", authenticateUser, userRouter);
+app.use("/api/auth", authRouter);
 
 app.use("*", (req, res) => {
   res.status(404).json({ msg: "Nėra tokio puslapio" });
