@@ -5,6 +5,8 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../errors/customErrors.js";
+import { PREKE_KATEGORIJA } from "../utils/constants.js";
+import mongoose from "mongoose";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -57,4 +59,19 @@ export const validateLoginInput = withValidationErrors([
     .isEmail()
     .withMessage("Tokio registruoto el.pašto nėra"),
   body("password").notEmpty().withMessage("Pamiršai įvesti slaptažodį"),
+]);
+
+export const validatePrekeInput = withValidationErrors([
+  body("barkodas").notEmpty().withMessage("Būtinas prekės barkodas"),
+  body("pavadinimas").notEmpty().withMessage("Būtinas prekės pavadinimas"),
+  body("barkodas").notEmpty().withMessage("Būtinas barkodas"),
+  body("kategorija")
+    .isIn(Object.values(PREKE_KATEGORIJA))
+    .withMessage("Būtina pasirinkti kategorija"),
+]);
+
+export const validateIdParam = withValidationErrors([
+  param("id")
+    .custom((value) => mongoose.Types.ObjectId.isValid(value))
+    .withMessage("Blogas MongoDB id"),
 ]);

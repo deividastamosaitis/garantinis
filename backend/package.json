@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon server.js"
+    "server": "nodemon server.js",
+    "setup-project": "npm i && cd .. && cd client && npm i",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +18,7 @@
     "dotenv": "^16.4.7",
     "exceljs": "^4.4.0",
     "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
     "express-validator": "^7.2.1",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.2",

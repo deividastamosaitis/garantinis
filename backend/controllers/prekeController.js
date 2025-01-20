@@ -1,102 +1,42 @@
-import mongoose from "mongoose";
-import Preke from "../models/PrekeModel.js";
-import User from "../models/UserModel.js";
+import Prekes from "../models/PrekeModel.js";
+import { StatusCodes } from "http-status-codes";
+import { NotFoundError } from "../errors/customErrors.js";
 
-/*************** Visos prekes */
-const getPrekes = async (req, res) => {
-  try {
-    const prekes = await Preke.find();
-    res.status(200).json({ prekes });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+export const getAllPrekes = async (req, res) => {
+  const prekes = await Prekes.find({});
+  res.status(StatusCodes.OK).json({ prekes });
 };
 
-/*******************Prekes sukurimas */
-const addPreke = async (req, res) => {
-  //pasiimam data is body
-  const { pavadinimas, barkodas } = req.body;
-
-  //tikrinam ar nera neuzpildytu vietu
-  if (!pavadinimas || !barkodas) {
-    return res.status(400).json({ error: "Neuzpildyta pilnai forma" });
-  }
-
-  //imam autorizuota useri
-  const user = await User.findById(req.user._id);
-
-  try {
-    const preke = await Preke.create({
-      user: user._id,
-      pavadinimas,
-      barkodas,
-    });
-    res.status(200).json({ msg: "Prekė pridėta", preke });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+export const createPreke = async (req, res) => {
+  const preke = await Prekes.create(req.body);
+  res.status(StatusCodes.CREATED).json({ preke });
 };
 
-/*******************Prekes istrinimas */
-const deletePreke = async (req, res) => {
-  //tikrinam ID
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).json({ error: "Nera tokios prekes su tokiu ID" });
-  }
-
-  //Tikrinam ar yra tokia preke
-  const preke = await Preke.findById(req.params.id);
-  if (!preke) {
-    return res.status(400).json({ error: "Nera tokios prekes" });
-  }
-
-  //ziurim ar useris idejo preke
-  const user = await User.findById(req.user._id);
-  if (!preke.user.equals(user._id)) {
-    return res.status(401).json({ error: "Neturi galimybes tai padaryti" });
-  }
-
-  try {
-    await preke.deleteOne();
-    res.status(200).json({ msg: "Prekė istrinta" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+export const getPreke = async (req, res) => {
+  const { id } = req.params;
+  const preke = await Prekes.findById(id);
+  if (!preke) throw new NotFoundError(`Tokios prekės su šiuo id: ${id} nėra`);
+  res.status(StatusCodes.OK).json({ preke });
 };
 
-/*******************Prekes update */
-const updatePreke = async (req, res) => {
-  //pasiimam data is body
-  const { pavadinimas, kaina } = req.body;
-
-  //tikrinam ar nera neuzpildytu vietu
-  if (!pavadinimas || !kaina) {
-    return res.status(400).json({ error: "Neuzpildyta pilnai forma" });
-  }
-
-  //tikrinam ID
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return res.status(400).json({ error: "Nera tokios prekes su tokiu ID" });
-  }
-
-  //Tikrinam ar yra tokia preke
-  const preke = await Preke.findById(req.params.id);
-  if (!preke) {
-    return res.status(400).json({ error: "Nera tokios prekes" });
-  }
-
-  //ziurim ar useris idejo preke
-  const user = await User.findById(req.user._id);
-  if (!preke.user.equals(user._id)) {
-    return res.status(401).json({ error: "Neturi galimybes tai padaryti" });
-  }
-
-  try {
-    await preke.updateOne({ pavadinimas, barkodas });
-    res.status(200).json({ msg: "Prekė atnaujinta" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+export const updatePreke = async (req, res) => {
+  const { id } = req.params;
+  const updatedPreke = await Prekes.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+  if (!updatedPreke)
+    throw new NotFoundError(`Tokios prekės su šiuo id: ${id} nėra`);
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: "Atnaujinta prekė", preke: updatedPreke });
 };
+export const deletePreke = async (req, res) => {
+  const { id } = req.params;
+  const removedPreke = await Prekes.findByIdAndDelete(id);
 
-export { getPrekes, addPreke, deletePreke, updatePreke };
+  if (!removedPreke)
+    throw new NotFoundError(`Tokios prekės su šiuo id: ${id} nėra`);
+  res
+    .status(StatusCodes.OK)
+    .json({ msg: "Ištrinta preke", preke: removedPreke });
+};
