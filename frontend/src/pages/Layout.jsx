@@ -160,7 +160,7 @@ const Layout = () => {
               </p>
             </div>
           </div>
-          <div class="flex items-center justify-center h-100 mb-4 rounded bg-gray-50 dark:bg-gray-800">
+          <div class="grid grid-cols-1 items-center justify-center h-100 mb-4 rounded bg-gray-50 dark:bg-gray-800">
             <Outlet />
           </div>
         </div>
