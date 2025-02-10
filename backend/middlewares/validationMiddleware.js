@@ -8,6 +8,7 @@ import {
 import { PREKE_KATEGORIJA } from "../utils/constants.js";
 import mongoose from "mongoose";
 import Prekes from "../models/PrekeModel.js";
+import Klientai from "../models/KlientasModel.js";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -70,6 +71,11 @@ export const validatePrekeInput = withValidationErrors([
     .isIn(Object.values(PREKE_KATEGORIJA))
     .withMessage("Būtina pasirinkti kategorija"),
 ]);
+export const validateKlientasInput = withValidationErrors([
+  body("vardas").notEmpty().withMessage("Būtinas klientas vardas"),
+  body("telefonas").notEmpty().withMessage("Būtinas kliento telefonas"),
+  body("miestas").notEmpty().withMessage("Būtinas kliento miestas"),
+]);
 
 export const validateIdParam = withValidationErrors([
   param("id").custom(async (value) => {
@@ -77,6 +83,19 @@ export const validateIdParam = withValidationErrors([
     if (!isValidId) throw new BadRequestError("Blogas MongoDB id");
     const preke = await Prekes.findById(value);
     if (!preke)
+      throw new NotFoundError(`Tokios prekės su šiuo id: ${value} nėra`);
+
+    // const isAdmin = req.user.role === "admin";
+    // if (!isAdmin)
+    //   throw new UnauthorizedError("not autorized to access this route");
+  }),
+]);
+export const validateKlientasIdParam = withValidationErrors([
+  param("id").custom(async (value) => {
+    const isValidId = mongoose.Types.ObjectId.isValid(value);
+    if (!isValidId) throw new BadRequestError("Blogas MongoDB id");
+    const klientas = await Klientai.findById(value);
+    if (!klientas)
       throw new NotFoundError(`Tokios prekės su šiuo id: ${value} nėra`);
 
     // const isAdmin = req.user.role === "admin";

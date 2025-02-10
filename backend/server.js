@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import PrekeRouter from "./routes/prekeRouter.js";
 import { authRouter } from "./routes/authRouter.js";
 import { userRouter } from "./routes/userRouter.js";
+import KlientasRouter from "./routes/klientasRouter.js";
 
 //middleware
 import errorHandlerMiddleware from "./middlewares/errorHandlerMiddleware.js";
@@ -26,6 +27,7 @@ app.use(express.json());
 
 app.use("/api/prekes", authenticateUser, PrekeRouter);
 app.use("/api/users", authenticateUser, userRouter);
+app.use("/api/klientai", authenticateUser, KlientasRouter);
 app.use("/api/auth", authRouter);
 
 app.use("*", (req, res) => {
