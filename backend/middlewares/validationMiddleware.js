@@ -9,6 +9,7 @@ import { PREKE_KATEGORIJA } from "../utils/constants.js";
 import mongoose from "mongoose";
 import Prekes from "../models/PrekeModel.js";
 import Klientai from "../models/KlientasModel.js";
+import Garantinis from "../models/GarantinisModel.js";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -96,6 +97,19 @@ export const validateKlientasIdParam = withValidationErrors([
     if (!isValidId) throw new BadRequestError("Blogas MongoDB id");
     const klientas = await Klientai.findById(value);
     if (!klientas)
+      throw new NotFoundError(`Tokios prekės su šiuo id: ${value} nėra`);
+
+    // const isAdmin = req.user.role === "admin";
+    // if (!isAdmin)
+    //   throw new UnauthorizedError("not autorized to access this route");
+  }),
+]);
+export const validateGarantinisIdParam = withValidationErrors([
+  param("id").custom(async (value) => {
+    const isValidId = mongoose.Types.ObjectId.isValid(value);
+    if (!isValidId) throw new BadRequestError("Blogas MongoDB id");
+    const garantinis = await Garantinis.findById(value);
+    if (!garantinis)
       throw new NotFoundError(`Tokios prekės su šiuo id: ${value} nėra`);
 
     // const isAdmin = req.user.role === "admin";
