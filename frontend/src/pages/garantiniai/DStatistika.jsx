@@ -1,81 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DStatistikaTable from "../../components/DStatistikaTable";
 
 const DStatistika = () => {
   const [filter, setFilter] = useState("all");
-  const [data, setData] = useState([
-    {
-      id: 1,
-      klientas: "Deiviux",
-      atsiskaitymas: "grynais",
-      kKaina: 119,
-      krepselis: [
-        { barkodas: "123456", preke: "S7XP-10MP", pKaina: 90 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 29 },
-      ],
-    },
-    {
-      id: 2,
-      klientas: "Laimiux",
-      atsiskaitymas: "kortele",
-      kKaina: 219,
-      krepselis: [
-        { barkodas: "111111", preke: "IP kamera", pKaina: 190 },
-        {
-          barkodas: "987654321",
-          preke: "atminties kortele",
-          pKaina: 29,
-          saskaita: "MAR00000",
-        },
-      ],
-    },
-    {
-      id: 3,
-      klientas: "Vidas",
-      atsiskaitymas: "kortele",
-      kKaina: 493,
-      krepselis: [
-        { barkodas: "111111", preke: "IP kamera", pKaina: 350 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 40 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 90 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 13 },
-      ],
-    },
-    {
-      id: 4,
-      klientas: "Ramute",
-      atsiskaitymas: "pavedimas",
-      kKaina: 493,
-      krepselis: [
-        { barkodas: "111111", preke: "IP kamera", pKaina: 350 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 40 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 90 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 13 },
-      ],
-    },
-    {
-      id: 5,
-      klientas: "Saugirdas",
-      atsiskaitymas: "pavedimas",
-      kKaina: 493,
-      krepselis: [
-        { barkodas: "111111", preke: "IP kamera", pKaina: 350 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 40 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 90 },
-        { barkodas: "987654321", preke: "atminties kortele", pKaina: 13 },
-      ],
-    },
-  ]);
+  const [data, setData] = useState([]); // Čia saugosime duomenis iš serverio
 
+  // Gauti duomenis iš serverio
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/garantinis"); // Jūsų API maršrutas
+        const result = await response.json();
+        setData(result.garantinis); // Nustatome gautus duomenis į state
+      } catch (error) {
+        console.error("Klaida gaunant duomenis:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Filtruoti duomenis pagal atsiskaitymo būdą
   const filteredData =
     filter === "all"
       ? data
       : data.filter((item) => item.atsiskaitymas === filter);
 
+  // Suskaičiuoti bendrą sumą pagal atsiskaitymo būdą
   const totalByPayment = (type) => {
     return data
       .filter((item) => item.atsiskaitymas === type)
-      .reduce((sum, item) => sum + item.kKaina, 0);
+      .reduce((sum, item) => sum + item.totalKaina, 0);
   };
 
   return (
@@ -114,29 +69,32 @@ const DStatistika = () => {
           Kortele
         </button>
       </div>
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Data
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Klientas
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Atsiskaitymas
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Kaina
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Prekės
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Sąskaita
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
+                Sukūrė
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Veiksmas
               </th>
             </tr>
@@ -147,9 +105,11 @@ const DStatistika = () => {
                 key={index}
                 klientas={pirkejas.klientas}
                 atsiskaitymas={pirkejas.atsiskaitymas}
-                kKaina={pirkejas.kKaina}
-                krepselis={pirkejas.krepselis}
+                kKaina={pirkejas.totalKaina}
+                krepselis={pirkejas.prekes}
                 saskaita={pirkejas.saskaita}
+                createdBy={pirkejas.createdBy} // Vartotojas, kuris sukūrė įrašą
+                createdAt={pirkejas.createdAt} // Sukūrimo data
               />
             ))}
           </tbody>

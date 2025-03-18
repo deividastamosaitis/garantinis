@@ -2,13 +2,31 @@ import Garantinis from "../models/GarantinisModel.js";
 import { StatusCodes } from "http-status-codes";
 
 export const getAllGarantinis = async (req, res) => {
-  const garantinis = await Garantinis.find({});
+  const garantinis = await Garantinis.find({})
+    .populate("createdBy", "vardas email") // Pridėkite vartotojo informaciją
+    .sort({ createdAt: -1 }); // Rūšiuoti pagal datą (naujausi viršuje)
+
   res.status(StatusCodes.OK).json({ garantinis });
+  // const garantinis = await Garantinis.find({});
+  // res.status(StatusCodes.OK).json({ garantinis });
 };
 
 export const createGarantinis = async (req, res) => {
-  const garantinis = await Garantinis.create(req.body);
+  const { klientas, prekes, atsiskaitymas, saskaita, totalKaina } = req.body;
+
+  // Pridėkite prisijungusio vartotojo ID
+  const garantinis = await Garantinis.create({
+    klientas,
+    prekes,
+    atsiskaitymas,
+    saskaita,
+    totalKaina,
+    createdBy: req.user.userId, // Čia pridedame vartotojo ID
+  });
+
   res.status(StatusCodes.CREATED).json({ garantinis });
+  // const garantinis = await Garantinis.create(req.body);
+  // res.status(StatusCodes.CREATED).json({ garantinis });
 };
 
 export const getGarantinis = async (req, res) => {

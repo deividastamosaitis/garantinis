@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const GarantinisPrekeSchema = new mongoose.Schema({
   barkodas: {
     type: String,
-    required: true,
   },
   pavadinimas: {
     type: String,
@@ -11,7 +10,6 @@ const GarantinisPrekeSchema = new mongoose.Schema({
   },
   serial: {
     type: String,
-    required: true,
   },
   kaina: {
     type: Number,
@@ -45,6 +43,11 @@ const GarantinisSchema = new mongoose.Schema(
     },
     totalKaina: {
       type: Number,
+      required: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Nuoroda į User modelį
       required: true,
     },
   },

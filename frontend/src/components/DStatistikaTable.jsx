@@ -1,65 +1,49 @@
-import React from "react";
-
 const DStatistikaTable = ({
   klientas,
   atsiskaitymas,
   kKaina,
   krepselis,
   saskaita,
+  createdBy,
+  createdAt,
 }) => {
+  const date = new Date(createdAt);
+  const isValidDate = !isNaN(date.getTime());
+
   return (
-    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200">
-      <td class="px-6 py-4">2024-12-2</td>
-      <th
-        scope="row"
-        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-      >
-        {klientas}
-      </th>
-      {atsiskaitymas === "kortele" ? (
-        <td className="px-6 py-4 text-red-500 font-bold">{atsiskaitymas}</td>
-      ) : atsiskaitymas === "grynais" ? (
-        <td className="px-6 py-4 text-green-500 font-bold">{atsiskaitymas}</td>
-      ) : (
-        <td className="px-6 py-4 text-yellow-400 font-bold">{atsiskaitymas}</td>
-      )}
-      <td class="px-6 py-4">{kKaina}</td>
-      <td class="px-6 py-4">
-        <div>
-          <table>
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th scope="col" className="px-2 py-3">
-                  Barkodas
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Prekė
-                </th>
-                <th scope="col" className="px-2 py-3">
-                  Kaina
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {krepselis.map((preke, index) => (
-                <tr key={index} className="border-b border-gray-200">
-                  <td class="px-2 py-2">{preke.barkodas}</td>
-                  <td class="px-2 py-2">{preke.preke}</td>
-                  <td class="px-2 py-2">{preke.pKaina}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+      <td className="px-6 py-4">
+        {isValidDate
+          ? date.toLocaleDateString("lt-LT", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })
+          : "Nėra datos"}
       </td>
-      <td class="px-6 py-4">{saskaita}</td>
-      <td class="px-6 py-4">
-        <a
-          href="#"
-          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-        >
-          Redaguoti
-        </a>
+      <td className="px-6 py-4">{klientas.vardas}</td>
+      <td className="px-6 py-4">{atsiskaitymas}</td>
+      <td className="px-6 py-4">{kKaina}€</td>
+      <td className="px-6 py-4">
+        <ul>
+          {krepselis.map((preke, index) => (
+            <li key={index}>
+              <strong>{preke.pavadinimas}</strong> - {preke.kaina}€ <br />
+              <span className="text-sm text-gray-500">
+                Serijos numeris: {preke.serial}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </td>
+      <td className="px-6 py-4">{saskaita}</td>
+      <td className="px-6 py-4">{createdBy.vardas}</td>{" "}
+      {/* Vartotojas, kuris sukūrė įrašą */}
+      <td className="px-6 py-4">
+        <button className="text-blue-500 hover:underline">Redaguoti</button>
       </td>
     </tr>
   );
