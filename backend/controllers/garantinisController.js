@@ -11,6 +11,26 @@ export const getAllGarantinis = async (req, res) => {
   // res.status(StatusCodes.OK).json({ garantinis });
 };
 
+export const getTodayGarantinis = async (req, res) => {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  try {
+    const garantinis = await Garantinis.find({
+      createdAt: { $gte: todayStart, $lte: todayEnd },
+    })
+      .populate("createdBy", "vardas email")
+      .sort({ createdAt: -1 });
+    res.status(StatusCodes.OK).json({ garantinis });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Klaida gaunant duomenis" });
+  }
+};
+
 export const createGarantinis = async (req, res) => {
   const { klientas, prekes, atsiskaitymas, saskaita, totalKaina } = req.body;
 

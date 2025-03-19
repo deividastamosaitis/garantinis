@@ -1,7 +1,22 @@
 import React from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useLoaderData, redirect } from "react-router-dom";
+import customFetch from "../utils/customFetch.js";
+
+export const loader = async () => {
+  try {
+    const { data } = await customFetch.get("/users/current-user");
+    console.log(data);
+    return data;
+  } catch (error) {
+    return redirect("/");
+  }
+};
 
 const Layout = () => {
+  const navigate = useNavigate();
+  const { user } = useLoaderData();
+
   return (
     <>
       <header>Header</header>
@@ -62,63 +77,66 @@ const Layout = () => {
                 </span>
               </Link>
             </li>
-            <li>
-              <button
-                type="button"
-                class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                aria-controls="statistika-admin"
-                data-collapse-toggle="statistika-admin"
-              >
-                <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white fa-solid fa-chart-pie"></i>
-                <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
-                  Statistika
-                </span>
-                <span class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
-                  Admin
-                </span>
-                <svg
-                  class="w-3 h-3"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 10 6"
+            {user.role === "admin" && (
+              <li>
+                <button
+                  type="button"
+                  class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  aria-controls="statistika-admin"
+                  data-collapse-toggle="statistika-admin"
                 >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m1 1 4 4 4-4"
-                  />
-                </svg>
-              </button>
-              <ul id="statistika-admin" class="hidden py-2 space-y-2">
-                <li>
-                  <Link
-                    to="/garantinis/k_statistika"
-                    class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white fa-solid fa-chart-pie"></i>
+                  <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
+                    Statistika
+                  </span>
+                  <span class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
+                    Admin
+                  </span>
+                  <svg
+                    class="w-3 h-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
                   >
-                    Klientų
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/garantinis/p_statistika"
-                    class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Prekių
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/garantinis/b_statistika"
-                    class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    Bendra
-                  </Link>
-                </li>
-              </ul>
-            </li>
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul id="statistika-admin" class="hidden py-2 space-y-2">
+                  <li>
+                    <Link
+                      to="/garantinis/k_statistika"
+                      class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >
+                      Klientų
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/garantinis/p_statistika"
+                      class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >
+                      Prekių
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/garantinis/b_statistika"
+                      class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >
+                      Bendra
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
             <li>
               <Link
                 to="/garantinis/klientai"

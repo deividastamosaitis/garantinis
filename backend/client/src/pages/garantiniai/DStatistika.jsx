@@ -1,34 +1,37 @@
 import React, { useState, useEffect } from "react";
+import { useLoaderData, redirect } from "react-router-dom";
+import customFetch from "../../utils/customFetch.js";
 import DStatistikaTable from "../../components/DStatistikaTable";
+
+export const loader = async () => {
+  try {
+    const { data } = await customFetch.get("/garantinis/today");
+    return { data };
+  } catch (error) {
+    toast.error(error?.response?.data?.msg);
+    return error;
+  }
+};
 
 const DStatistika = () => {
   const [filter, setFilter] = useState("all");
-  const [data, setData] = useState([]); // Čia saugosime duomenis iš serverio
-
-  // Gauti duomenis iš serverio
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/garantinis"); // Jūsų API maršrutas
-        const result = await response.json();
-        setData(result.garantinis); // Nustatome gautus duomenis į state
-      } catch (error) {
-        console.error("Klaida gaunant duomenis:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const data = useLoaderData(); // Gauti duomenis iš loader funkcijos
+  const garantinis = data.data.garantinis;
 
   // Filtruoti duomenis pagal atsiskaitymo būdą
   const filteredData =
     filter === "all"
-      ? data
-      : data.filter((item) => item.atsiskaitymas === filter);
+      ? garantinis
+      : garantinis.filter((item) => item.atsiskaitymas === filter);
+
+  if (!Array.isArray(filteredData)) {
+    console.error("filteredData nėra masyvas:", filteredData);
+    return null; // Arba grąžinkite klaidos pranešimą
+  }
 
   // Suskaičiuoti bendrą sumą pagal atsiskaitymo būdą
   const totalByPayment = (type) => {
-    return data
+    return garantinis
       .filter((item) => item.atsiskaitymas === type)
       .reduce((sum, item) => sum + item.totalKaina, 0);
   };
@@ -108,25 +111,28 @@ const DStatistika = () => {
                 kKaina={pirkejas.totalKaina}
                 krepselis={pirkejas.prekes}
                 saskaita={pirkejas.saskaita}
-                createdBy={pirkejas.createdBy} // Vartotojas, kuris sukūrė įrašą
-                createdAt={pirkejas.createdAt} // Sukūrimo data
+                createdBy={pirkejas.createdBy}
+                createdAt={pirkejas.createdAt}
               />
             ))}
           </tbody>
         </table>
       </div>
-      <div className="grid grid-cols-3">
-        <div className="flex text-center h-20 bg-yellow-500 text-white font-bold items-center justify-center ">
+      {/* Bendras atsiskaitymų skaičius pagal būdą */}
+      <div className="grid grid-cols-3 mt-4">
+        <div className="flex text-center h-20 bg-yellow-500 text-white font-bold items-center justify-center">
           <span>Pavedimu: </span>
-          <span className="ml-1">{totalByPayment("pavedimas")}€</span>
+          <span className="ml-1">
+            {totalByPayment("pavedimas").toFixed(2)}€
+          </span>
         </div>
-        <div className="flex text-center h-20 bg-red-500 text-white font-bold items-center justify-center ">
+        <div className="flex text-center h-20 bg-red-500 text-white font-bold items-center justify-center">
           <span>Kortele: </span>
-          <span className="ml-1">{totalByPayment("kortele")}€</span>
+          <span className="ml-1">{totalByPayment("kortele").toFixed(2)}€</span>
         </div>
-        <div className="flex text-center h-20 bg-green-500 text-white font-bold items-center justify-center ">
+        <div className="flex text-center h-20 bg-green-500 text-white font-bold items-center justify-center">
           <span>Grynais: </span>
-          <span className="ml-1">{totalByPayment("grynais")}€</span>
+          <span className="ml-1">{totalByPayment("grynais").toFixed(2)}€</span>
         </div>
       </div>
     </>

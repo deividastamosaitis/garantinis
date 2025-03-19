@@ -20,6 +20,9 @@ import KStatistika from "./pages/garantiniai/KStatistika";
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
 import { loader as allPrekesLoader } from "./pages/Prekes";
+import { loader as DStatistikaLoader } from "./pages/garantiniai/DStatistika";
+import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
+import { loader as userLoader } from "./pages/Layout";
 import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
@@ -44,9 +47,14 @@ const router = createBrowserRouter([
       {
         path: "garantinis",
         element: <Layout />,
+        loader: userLoader,
         children: [
           { path: "pildyti", element: <Pildyti /> },
-          { path: "d_statistika", element: <DStatistika /> },
+          {
+            path: "d_statistika",
+            element: <DStatistika />,
+            loader: DStatistikaLoader,
+          },
           {
             path: "klientai",
             element: <Klientai />,
@@ -62,6 +70,7 @@ const router = createBrowserRouter([
           {
             path: "b_statistika",
             element: <BStatistika />,
+            loader: BStatistikaLoader,
           },
           {
             path: "prekes",

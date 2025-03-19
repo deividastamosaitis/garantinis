@@ -15,6 +15,7 @@ export const loader = async () => {
 
 const Prekes = () => {
   const { data } = useLoaderData();
+  console.log(data);
   const { prekes } = data;
   return prekes.map((preke) => (
     <li>
