@@ -42,6 +42,6 @@ mongoose
   .connect(process.env.DATABASE_URL, { dbName: process.env.DATABASE_NAME })
   .then(() => {
     console.log("Prisijungta prie mongodb sekmingai");
-    app.listen(5100, () => console.log("listening to port 5100"));
+    app.listen(4000, () => console.log("listening to port 4000"));
   })
   .catch((err) => console.log(err));
