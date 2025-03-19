@@ -78,41 +78,22 @@ const Layout = () => {
               </Link>
             </li>
             {user.role === "admin" && (
-              <li>
-                <button
-                  type="button"
-                  class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  aria-controls="statistika-admin"
-                  data-collapse-toggle="statistika-admin"
-                >
-                  <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white fa-solid fa-chart-pie"></i>
-                  <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
-                    Statistika
-                  </span>
-                  <span class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
-                    Admin
-                  </span>
-                  <svg
-                    class="w-3 h-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </button>
-                <ul id="statistika-admin" class="hidden py-2 space-y-2">
+              <>
+                <ul class="space-y-2 font-medium">
+                  <li className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                    <i className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white fa-solid fa-chart-pie"></i>
+                    <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
+                      Statistika
+                    </span>
+                    <span className="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
+                      Admin
+                    </span>
+                  </li>
+                  {/* This id matches data-collapse-toggle */}
                   <li>
                     <Link
                       to="/garantinis/k_statistika"
-                      class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
                       Klientų
                     </Link>
@@ -120,7 +101,7 @@ const Layout = () => {
                   <li>
                     <Link
                       to="/garantinis/p_statistika"
-                      class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
                       Prekių
                     </Link>
@@ -128,13 +109,13 @@ const Layout = () => {
                   <li>
                     <Link
                       to="/garantinis/b_statistika"
-                      class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                      className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
                       Bendra
                     </Link>
                   </li>
                 </ul>
-              </li>
+              </>
             )}
 
             <li>
