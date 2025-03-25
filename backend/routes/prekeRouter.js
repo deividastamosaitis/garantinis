@@ -17,7 +17,10 @@ import {
 } from "../middlewares/validationMiddleware.js";
 import { authenticateUser } from "../middlewares/authMiddleware.js";
 
-router.route("/").get(getAllPrekes).post(validatePrekeInput, createPreke);
+router
+  .route("/")
+  .get(getAllPrekes)
+  .post(authenticateUser, validatePrekeInput, createPreke);
 
 router.route("/barcode/:barcode").get(authenticateUser, getPrekeByBarcode);
 

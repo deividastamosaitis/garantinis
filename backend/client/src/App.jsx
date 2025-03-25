@@ -19,6 +19,7 @@ import BStatistika from "./pages/garantiniai/BStatistika";
 import KStatistika from "./pages/garantiniai/KStatistika";
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
+import { action as prekeAction } from "./pages/Prekes";
 import { loader as allPrekesLoader } from "./pages/Prekes";
 import { loader as DStatistikaLoader } from "./pages/garantiniai/DStatistika";
 import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
             path: "prekes",
             element: <Prekes />,
             loader: allPrekesLoader,
+            action: prekeAction,
           },
         ],
       },

@@ -8,7 +8,10 @@ export const getAllPrekes = async (req, res) => {
 };
 
 export const createPreke = async (req, res) => {
-  const preke = await Prekes.create(req.body);
+  const preke = await Prekes.create({
+    ...req.body,
+    createdBy: req.user.userId, // Assuming you have user in request
+  });
   res.status(StatusCodes.CREATED).json({ preke });
 };
 
