@@ -1,5 +1,6 @@
 import Garantinis from "../models/GarantinisModel.js";
 import { StatusCodes } from "http-status-codes";
+import Prekes from "../models/PrekeModel.js";
 
 export const getAllGarantinis = async (req, res) => {
   const garantinis = await Garantinis.find({})
@@ -33,20 +34,49 @@ export const getTodayGarantinis = async (req, res) => {
 
 export const createGarantinis = async (req, res) => {
   const { klientas, prekes, atsiskaitymas, saskaita, totalKaina } = req.body;
+  const userId = req.user.userId;
 
-  // Pridėkite prisijungusio vartotojo ID
-  const garantinis = await Garantinis.create({
-    klientas,
-    prekes,
-    atsiskaitymas,
-    saskaita,
-    totalKaina,
-    createdBy: req.user.userId, // Čia pridedame vartotojo ID
-  });
+  try {
+    // First save/update all products
+    await Promise.all(
+      prekes.map(async (preke) => {
+        if (preke.barkodas && preke.pavadinimas) {
+          try {
+            await Prekes.findOneAndUpdate(
+              { barkodas: preke.barkodas },
+              {
+                pavadinimas: preke.pavadinimas,
+                createdBy: userId,
+              },
+              { upsert: true, new: true }
+            );
+          } catch (error) {
+            console.error(`Klaida išsaugant prekę ${preke.barkodas}:`, error);
+          }
+        }
+      })
+    );
 
-  res.status(StatusCodes.CREATED).json({ garantinis });
-  // const garantinis = await Garantinis.create(req.body);
-  // res.status(StatusCodes.CREATED).json({ garantinis });
+    // Then create the garantinis record
+    const garantinis = await Garantinis.create({
+      klientas,
+      prekes,
+      atsiskaitymas,
+      saskaita,
+      totalKaina,
+      createdBy: userId,
+    });
+
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: garantinis,
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Klaida kuriant garantinį įrašą",
+    });
+  }
 };
 
 export const getGarantinis = async (req, res) => {

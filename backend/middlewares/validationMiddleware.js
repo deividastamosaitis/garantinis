@@ -68,9 +68,6 @@ export const validatePrekeInput = withValidationErrors([
   body("barkodas").notEmpty().withMessage("Būtinas prekės barkodas"),
   body("pavadinimas").notEmpty().withMessage("Būtinas prekės pavadinimas"),
   body("barkodas").notEmpty().withMessage("Būtinas barkodas"),
-  body("kategorija")
-    .isIn(Object.values(PREKE_KATEGORIJA))
-    .withMessage("Būtina pasirinkti kategorija"),
 ]);
 export const validateKlientasInput = withValidationErrors([
   body("vardas").notEmpty().withMessage("Būtinas klientas vardas"),
