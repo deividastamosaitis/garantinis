@@ -13,6 +13,7 @@ import { validateGarantinisIdParam } from "../middlewares/validationMiddleware.j
 
 router.route("/").post(createGarantinis).get(getAllGarantinis);
 router.route("/today").get(getTodayGarantinis);
+
 router
   .route("/:id")
   .get(validateGarantinisIdParam, getGarantinis)

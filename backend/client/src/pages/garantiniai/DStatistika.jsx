@@ -125,7 +125,8 @@ const DStatistika = () => {
           <tbody>
             {filteredData.map((pirkejas, index) => (
               <DStatistikaTable
-                key={index}
+                key={pirkejas._id}
+                _id={pirkejas._id}
                 klientas={pirkejas.klientas}
                 atsiskaitymas={pirkejas.atsiskaitymas}
                 kKaina={pirkejas.totalKaina}

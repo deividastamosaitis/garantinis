@@ -80,18 +80,47 @@ export const createGarantinis = async (req, res) => {
 };
 
 export const getGarantinis = async (req, res) => {
-  const { id } = req.params;
-  const garantinis = await Garantinis.findById(id);
-  res.status(StatusCodes.OK).json({ garantinis });
+  try {
+    const garantinis = await Garantinis.findById(req.params.id).populate(
+      "createdBy",
+      "vardas email"
+    );
+
+    if (!garantinis) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Garantinis not found",
+      });
+    }
+
+    res.status(StatusCodes.OK).json({ garantinis });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Failed to fetch garantinis",
+      error: error.message,
+    });
+  }
 };
 
 export const updateGarantinis = async (req, res) => {
-  const { id } = req.params;
-  const updatedGarantinis = await Garantinis.findByIdAndUpdate(id, req.body, {
-    new: true,
-  });
+  try {
+    const updatedGarantinis = await Garantinis.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).populate("createdBy", "vardas email");
 
-  res
-    .status(StatusCodes.OK)
-    .json({ msg: "Atnaujintas garantinis", garantinis: updatedGarantinis });
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Garantinis updated",
+      garantinis: updatedGarantinis,
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Failed to update garantinis",
+      error: error.message,
+    });
+  }
 };

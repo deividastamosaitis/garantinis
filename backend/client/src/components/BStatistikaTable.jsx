@@ -1,6 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const BStatistikaTable = ({
+  _id,
   klientas,
   atsiskaitymas,
   kKaina,
@@ -44,7 +46,12 @@ const BStatistikaTable = ({
       <td className="px-6 py-4">{saskaita}</td>
       <td className="px-6 py-4">{createdBy.vardas}</td>
       <td className="px-6 py-4">
-        <button className="text-blue-500 hover:underline">Redaguoti</button>
+        <Link
+          to={`../garantinis/${_id}`}
+          className="text-blue-500 hover:underline"
+        >
+          Redaguoti
+        </Link>
       </td>
     </tr>
   );

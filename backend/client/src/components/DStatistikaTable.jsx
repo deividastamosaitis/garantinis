@@ -1,4 +1,7 @@
+import { Link } from "react-router-dom";
+
 const DStatistikaTable = ({
+  _id,
   klientas,
   atsiskaitymas,
   kKaina,
@@ -44,7 +47,12 @@ const DStatistikaTable = ({
       <td className="px-6 py-4">{createdBy.vardas}</td>{" "}
       {/* Vartotojas, kuris sukūrė įrašą */}
       <td className="px-6 py-4">
-        <button className="text-blue-500 hover:underline">Redaguoti</button>
+        <Link
+          to={`../garantinis/${_id}`}
+          className="text-blue-500 hover:underline"
+        >
+          Redaguoti
+        </Link>
       </td>
     </tr>
   );

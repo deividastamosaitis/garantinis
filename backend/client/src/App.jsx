@@ -17,13 +17,16 @@ import PStatistika from "./pages/garantiniai/PStatistika";
 import DStatistika from "./pages/garantiniai/DStatistika";
 import BStatistika from "./pages/garantiniai/BStatistika";
 import KStatistika from "./pages/garantiniai/KStatistika";
+import EditGarantinis from "./pages/garantiniai/EditGarantinis";
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
 import { action as prekeAction } from "./pages/Prekes";
+import { action as garantinisAction } from "./pages/garantiniai/EditGarantinis";
 import { loader as allPrekesLoader } from "./pages/Prekes";
 import { loader as DStatistikaLoader } from "./pages/garantiniai/DStatistika";
 import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
 import { loader as userLoader } from "./pages/Layout";
+import { loader as garantinisLoader } from "./pages/garantiniai/EditGarantinis";
 import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
@@ -78,6 +81,12 @@ const router = createBrowserRouter([
             element: <Prekes />,
             loader: allPrekesLoader,
             action: prekeAction,
+          },
+          {
+            path: "garantinis/:id",
+            element: <EditGarantinis />,
+            loader: garantinisLoader,
+            action: garantinisAction,
           },
         ],
       },
