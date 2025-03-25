@@ -48,11 +48,12 @@ const BStatistika = () => {
     const formattedData = data.flatMap((item) =>
       item.prekes.map((preke) => ({
         Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
-        Klientas: item.klientas.vardas,
-        Atsiskaitymas: item.atsiskaitymas,
-        Kaina: preke.kaina,
+        Barkodas: preke.barkodas,
         Prekė: preke.pavadinimas,
         "Serijos numeris": preke.serial,
+        Kaina: preke.kaina,
+        Atsiskaitymas: item.atsiskaitymas,
+        Klientas: item.klientas.vardas,
         Sąskaita: item.saskaita,
         Sukūrė: item.createdBy.vardas,
       }))
