@@ -75,6 +75,22 @@ const DStatistika = () => {
         >
           Kortele
         </button>
+        <button
+          className={`px-4 py-2 border rounded ${
+            filter === "kortele" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("lizingas")}
+        >
+          Lizingas
+        </button>
+        <button
+          className={`px-4 py-2 border rounded ${
+            filter === "kortele" ? "bg-gray-500 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("COD")}
+        >
+          C.O.D
+        </button>
       </div>
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

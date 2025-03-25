@@ -269,6 +269,8 @@ const Pildyti = () => {
                   <option value="grynais">Grynais</option>
                   <option value="kortele">Kortele</option>
                   <option value="pavedimas">Pavedimas</option>
+                  <option value="pavedimas">COD</option>
+                  <option value="pavedimas">Lizingas</option>
                 </select>
               </div>
             </div>

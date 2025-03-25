@@ -52,6 +52,8 @@ const Layout = () => {
     item.createdAt.startsWith(todayDate)
   );
 
+  console.log(user.user.role);
+
   return (
     <>
       <header>Header</header>
@@ -112,7 +114,7 @@ const Layout = () => {
                 </span>
               </Link>
             </li>
-            {user.role === "admin" && (
+            {user.user.role === "admin" && (
               <>
                 <ul class="space-y-2 font-medium">
                   <li className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
