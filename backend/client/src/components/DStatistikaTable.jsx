@@ -31,6 +31,7 @@ const DStatistikaTable = ({
         <ul>
           {krepselis.map((preke, index) => (
             <li key={index}>
+              {`(${preke.barkodas}) `}
               <strong>{preke.pavadinimas}</strong> - {preke.kaina}€ <br />
               <span className="text-sm text-gray-500">
                 Serijos numeris: {preke.serial}

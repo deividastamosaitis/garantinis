@@ -5,9 +5,17 @@ import customFetch from "../utils/customFetch.js";
 
 export const loader = async () => {
   try {
-    const { data } = await customFetch.get("/users/current-user");
-    console.log(data);
-    return data;
+    const [userResponse, garantinisResponse] = await Promise.all([
+      customFetch.get("/users/current-user"),
+      customFetch.get("/garantinis/today"),
+    ]);
+
+    const garantinisArray = garantinisResponse.data.garantinis || [];
+
+    return {
+      user: userResponse.data,
+      garantinis: garantinisArray,
+    };
   } catch (error) {
     return redirect("/");
   }
@@ -15,7 +23,34 @@ export const loader = async () => {
 
 const Layout = () => {
   const navigate = useNavigate();
-  const { user } = useLoaderData();
+  const { user, garantinis } = useLoaderData();
+
+  const totalPayment = garantinis
+    .filter((item) => item.totalKaina)
+    .reduce((sum, item) => sum + item.totalKaina, 0);
+
+  //skaičiuojam mėnesio suma
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  const totalMonthPayment = garantinis
+    .filter((item) => {
+      const itemDate = new Date(item.createdAt);
+      return (
+        itemDate.getMonth() === currentMonth &&
+        itemDate.getFullYear() === currentYear
+      );
+    })
+    .reduce((sum, item) => sum + item.totalKaina, 0);
+
+  //skaiciuojam kiek siandien krepseliu
+  const today = new Date();
+  const todayDate = today.toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+  const todayGarantinis = garantinis.filter((item) =>
+    item.createdAt.startsWith(todayDate)
+  );
 
   return (
     <>
@@ -145,17 +180,17 @@ const Layout = () => {
           <div class="grid grid-cols-3 gap-4 mb-4">
             <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
               <p class="text-2xl text-gray-400 dark:text-gray-500">
-                Šiandienos užpildyti krepšeliai
+                Šiandienos užpildyti krepšeliai: {todayGarantinis.length} vnt
               </p>
             </div>
             <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
               <p class="text-2xl text-gray-400 dark:text-gray-500">
-                Šiandienos suma
+                Šiandienos suma: {totalPayment}€
               </p>
             </div>
             <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
               <p class="text-2xl text-gray-400 dark:text-gray-500">
-                Mėnesio užpildyti krepšeliai
+                Mėnesio užpildyti krepšeliai: {totalMonthPayment}€
               </p>
             </div>
           </div>

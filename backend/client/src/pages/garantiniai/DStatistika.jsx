@@ -36,6 +36,10 @@ const DStatistika = () => {
       .reduce((sum, item) => sum + item.totalKaina, 0);
   };
 
+  const totalPayment = garantinis
+    .filter((item) => item.totalKaina)
+    .reduce((sum, item) => sum + item.totalKaina, 0);
+
   return (
     <>
       <div className="flex gap-4 mb-4">
