@@ -1,5 +1,11 @@
 import React from "react";
-import { Form, useLoaderData, redirect, useNavigation } from "react-router-dom";
+import {
+  Form,
+  useLoaderData,
+  redirect,
+  useNavigation,
+  useSubmit,
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import customFetch from "../../utils/customFetch";
 
@@ -14,6 +20,19 @@ export const loader = async ({ params }) => {
 };
 
 export const action = async ({ request, params }) => {
+  // Handle DELETE method
+  if (request.method === "DELETE") {
+    try {
+      await customFetch.delete(`/garantinis/${params.id}`);
+      toast.success("Garantinis sėkmingai ištrintas");
+      return redirect("/garantinis/d_statistika"); // This will redirect after deletion
+    } catch (error) {
+      toast.error(error?.response?.data?.msg || "Klaida trinant garantinį");
+      return null; // Stay on current page if error occurs
+    }
+  }
+
+  // Handle PATCH method (original update functionality)
   const formData = await request.formData();
   const updates = {
     klientas: {
@@ -54,7 +73,13 @@ export const action = async ({ request, params }) => {
 const EditGarantinis = () => {
   const { garantinis } = useLoaderData();
   const navigation = useNavigation();
+  const submit = useSubmit();
   const isSubmitting = navigation.state === "submitting";
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+
+  const handleDelete = () => {
+    submit(null, { method: "delete" });
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -178,20 +203,57 @@ const EditGarantinis = () => {
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
-            onClick={() => window.history.back()}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-red-300"
             disabled={isSubmitting}
           >
-            Atšaukti
+            Ištrinti
           </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Išsaugoma..." : "Išsaugoti pakeitimus"}
-          </button>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              disabled={isSubmitting}
+            >
+              Atšaukti
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Išsaugoma..." : "Išsaugoti pakeitimus"}
+            </button>
+          </div>
         </div>
+
+        {/* Delete confirmation modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white p-6 rounded-lg max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-4">
+                Ar tikrai norite ištrinti šį garantinį?
+              </h3>
+              <p className="mb-6">Šis veiksmas negali būti atšauktas.</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Atšaukti
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Ištrinti
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Form>
     </div>
   );

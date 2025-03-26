@@ -124,3 +124,27 @@ export const updateGarantinis = async (req, res) => {
     });
   }
 };
+
+export const deleteGarantinis = async (req, res) => {
+  try {
+    const garantinis = await Garantinis.findByIdAndDelete(req.params.id);
+
+    if (!garantinis) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Garantinis nerastas",
+      });
+    }
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Garantinis sėkmingai ištrintas",
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Klaida trinant garantinį",
+      error: error.message,
+    });
+  }
+};

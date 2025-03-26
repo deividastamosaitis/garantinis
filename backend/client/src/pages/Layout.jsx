@@ -5,16 +5,21 @@ import customFetch from "../utils/customFetch.js";
 
 export const loader = async () => {
   try {
-    const [userResponse, garantinisResponse] = await Promise.all([
-      customFetch.get("/users/current-user"),
-      customFetch.get("/garantinis/today"),
-    ]);
+    const [userResponse, garantinisResponse, todayResponse] = await Promise.all(
+      [
+        customFetch.get("/users/current-user"),
+        customFetch.get("/garantinis"),
+        customFetch.get("/garantinis/today"),
+      ]
+    );
 
     const garantinisArray = garantinisResponse.data.garantinis || [];
+    const todayGarantinisArray = todayResponse.data.garantinis || [];
 
     return {
       user: userResponse.data,
       garantinis: garantinisArray,
+      todaygarantinis: todayGarantinisArray,
     };
   } catch (error) {
     return redirect("/");
@@ -23,9 +28,9 @@ export const loader = async () => {
 
 const Layout = () => {
   const navigate = useNavigate();
-  const { user, garantinis } = useLoaderData();
+  const { user, garantinis, todaygarantinis } = useLoaderData();
 
-  const totalPayment = garantinis
+  const totalPayment = todaygarantinis
     .filter((item) => item.totalKaina)
     .reduce((sum, item) => sum + item.totalKaina, 0);
 
@@ -51,8 +56,6 @@ const Layout = () => {
   const todayGarantinis = garantinis.filter((item) =>
     item.createdAt.startsWith(todayDate)
   );
-
-  console.log(user.user.role);
 
   return (
     <>

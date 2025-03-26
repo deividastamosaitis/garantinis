@@ -8,6 +8,7 @@ import {
   getGarantinis,
   updateGarantinis,
   getTodayGarantinis,
+  deleteGarantinis,
 } from "../controllers/garantinisController.js";
 import { validateGarantinisIdParam } from "../middlewares/validationMiddleware.js";
 
@@ -17,6 +18,7 @@ router.route("/today").get(getTodayGarantinis);
 router
   .route("/:id")
   .get(validateGarantinisIdParam, getGarantinis)
-  .patch(validateGarantinisIdParam, updateGarantinis);
+  .patch(validateGarantinisIdParam, updateGarantinis)
+  .delete(deleteGarantinis);
 
 export default router;
