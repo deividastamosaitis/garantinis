@@ -131,7 +131,9 @@ const EditGarantinis = () => {
             >
               <option value="grynais">Grynais</option>
               <option value="kortele">Kortele</option>
-              <option value="pavedimu">Pavedimu</option>
+              <option value="pavedimas">Pavedimas</option>
+              <option value="COD">C.O.D</option>
+              <option value="lizingas">Lizingas</option>
             </select>
           </div>
           <div>
