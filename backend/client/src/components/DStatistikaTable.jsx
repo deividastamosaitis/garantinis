@@ -7,6 +7,7 @@ const DStatistikaTable = ({
   kKaina,
   krepselis,
   saskaita,
+  kvitas,
   createdBy,
   createdAt,
 }) => {
@@ -28,6 +29,7 @@ const DStatistikaTable = ({
           : "Nėra datos"}
       </td>
       <td className="px-6 py-4">{klientas.vardas}</td>
+      <td className="px-6 py-4">{klientas.telefonas}</td>
       <td className="px-6 py-4">{atsiskaitymas}</td>
       <td className="px-6 py-4">{kKaina}€</td>
       <td className="px-6 py-4">
@@ -44,6 +46,7 @@ const DStatistikaTable = ({
         </ul>
       </td>
       <td className="px-6 py-4">{saskaita}</td>
+      <td className="px-6 py-4">{kvitas}</td>
       <td className="px-6 py-4">{createdBy.vardas}</td>{" "}
       {/* Vartotojas, kuris sukūrė įrašą */}
       <td className="px-6 py-4">

@@ -7,6 +7,7 @@ const BStatistikaTable = ({
   atsiskaitymas,
   kKaina,
   krepselis,
+  kvitas,
   saskaita,
   createdBy,
   createdAt,
@@ -44,6 +45,7 @@ const BStatistikaTable = ({
         </ul>
       </td>
       <td className="px-6 py-4">{saskaita}</td>
+      <td className="px-6 py-4">{kvitas}</td>
       <td className="px-6 py-4">{createdBy.vardas}</td>
       <td className="px-6 py-4">
         <Link

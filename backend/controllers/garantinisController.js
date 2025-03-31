@@ -33,7 +33,8 @@ export const getTodayGarantinis = async (req, res) => {
 };
 
 export const createGarantinis = async (req, res) => {
-  const { klientas, prekes, atsiskaitymas, saskaita, totalKaina } = req.body;
+  const { klientas, prekes, atsiskaitymas, kvitas, saskaita, totalKaina } =
+    req.body;
   const userId = req.user.userId;
 
   try {
@@ -62,6 +63,7 @@ export const createGarantinis = async (req, res) => {
       klientas,
       prekes,
       atsiskaitymas,
+      kvitas,
       saskaita,
       totalKaina,
       createdBy: userId,
@@ -144,6 +146,71 @@ export const deleteGarantinis = async (req, res) => {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Klaida trinant garantinį",
+      error: error.message,
+    });
+  }
+};
+
+export const searchGarantinisByClient = async (req, res) => {
+  try {
+    const { searchTerm } = req.query;
+
+    if (!searchTerm) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Search term is required",
+      });
+    }
+
+    const garantinis = await Garantinis.find({
+      $or: [
+        { "klientas.vardas": { $regex: searchTerm, $options: "i" } },
+        { "klientas.telefonas": { $regex: searchTerm, $options: "i" } },
+      ],
+    })
+      .populate("createdBy", "vardas email")
+      .sort({ createdAt: -1 });
+
+    if (garantinis.length === 0) {
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: "No purchases found for this client",
+        products: [],
+        totalValue: 0,
+        clientInfo: null,
+      });
+    }
+
+    // Extract client info from the first matching record (assuming same client)
+    const clientInfo = garantinis[0].klientas;
+
+    // Extract all products and calculate total value
+    let totalValue = 0;
+    const allProducts = garantinis.reduce((acc, garantinisItem) => {
+      const productsWithDate = garantinisItem.prekes.map((product) => {
+        const productValue = product.kaina || 0;
+        totalValue += productValue;
+
+        return {
+          ...(product.toObject ? product.toObject() : product),
+          purchaseDate: garantinisItem.createdAt,
+          garantinisId: garantinisItem._id,
+        };
+      });
+      return acc.concat(productsWithDate);
+    }, []);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      products: allProducts,
+      totalValue,
+      clientInfo,
+      purchaseCount: garantinis.length, // Number of purchase records
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Error searching client purchases",
       error: error.message,
     });
   }

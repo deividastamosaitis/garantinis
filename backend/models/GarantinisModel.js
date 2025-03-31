@@ -34,6 +34,10 @@ const GarantinisSchema = new mongoose.Schema(
       },
     },
     prekes: [GarantinisPrekeSchema],
+    kvitas: {
+      type: String,
+      required: false,
+    },
     atsiskaitymas: {
       type: String,
       required: true,

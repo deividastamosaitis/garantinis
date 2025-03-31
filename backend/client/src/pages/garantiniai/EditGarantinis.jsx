@@ -40,6 +40,7 @@ export const action = async ({ request, params }) => {
     },
     atsiskaitymas: formData.get("atsiskaitymas"),
     saskaita: formData.get("saskaita"),
+    kvitas: formData.get("kvitas"),
     prekes: [],
     totalKaina: parseFloat(formData.get("totalKaina")) || 0,
   };
@@ -191,6 +192,15 @@ const EditGarantinis = () => {
               type="text"
               name="saskaita"
               defaultValue={garantinis.saskaita}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Kvito numeris:</label>
+            <input
+              type="text"
+              name="kvitas"
+              defaultValue={garantinis.kvitas}
               className="w-full p-2 border rounded"
             />
           </div>

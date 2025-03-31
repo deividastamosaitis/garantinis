@@ -4,6 +4,7 @@ const Pildyti = () => {
   const [pranesimas, setPranesimas] = useState(null);
   const [atsiskaitymas, setAtsiskaitymas] = useState("");
   const [saskaita, setSaskaita] = useState("");
+  const [kvitas, setKvitas] = useState("");
   const [forma, setForma] = useState([
     { barkodas: "", pavadinimas: "", serial: "", kaina: 0 },
   ]);
@@ -118,6 +119,7 @@ const Pildyti = () => {
         prekes: forma,
         atsiskaitymas,
         saskaita,
+        kvitas,
         totalKaina,
         createdBy: userId,
         createdAt,
@@ -141,6 +143,7 @@ const Pildyti = () => {
         setKlientas({ vardas: "", telefonas: "", miestas: "Kaunas" });
         setAtsiskaitymas("");
         setSaskaita("");
+        setKvitas("");
       } else {
         const errorData = await response.json();
         setPranesimas(errorData.message || "Klaida kuriant įrašą");
@@ -328,6 +331,7 @@ const Pildyti = () => {
               }
             />
           </div>
+
           <div>
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -364,7 +368,17 @@ const Pildyti = () => {
               />
             </div>
           </div>
-          <div></div>
+          <div className="">
+            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Kvito nr.: (atsiskaičius kortele/grynais)
+            </label>
+            <input
+              type="text"
+              value={kvitas}
+              onChange={(e) => setKvitas(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            />
+          </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
               Krepšelio kaina:

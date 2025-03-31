@@ -27,6 +27,7 @@ import { loader as DStatistikaLoader } from "./pages/garantiniai/DStatistika";
 import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
 import { loader as userLoader } from "./pages/Layout";
 import { loader as garantinisLoader } from "./pages/garantiniai/EditGarantinis";
+import { loader as klientaiLoader } from "./pages/Klientai";
 import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
           {
             path: "klientai",
             element: <Klientai />,
+            loader: klientaiLoader,
           },
           {
             path: "k_statistika",

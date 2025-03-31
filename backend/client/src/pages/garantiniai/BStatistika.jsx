@@ -55,6 +55,7 @@ const BStatistika = () => {
         Atsiskaitymas: item.atsiskaitymas,
         Klientas: item.klientas.vardas,
         Sąskaita: item.saskaita,
+        Kvitas: item.kvitas,
         Sukūrė: item.createdBy.vardas,
       }))
     );
@@ -141,6 +142,9 @@ const BStatistika = () => {
                 Sąskaita
               </th>
               <th scope="col" className="px-6 py-3">
+                Kvitas
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Sukūrė
               </th>
               <th scope="col" className="px-6 py-3">
@@ -158,6 +162,7 @@ const BStatistika = () => {
                 kKaina={pirkejas.totalKaina}
                 krepselis={pirkejas.prekes}
                 saskaita={pirkejas.saskaita}
+                kvitas={pirkejas.kvitas}
                 createdBy={pirkejas.createdBy}
                 createdAt={pirkejas.createdAt}
               />

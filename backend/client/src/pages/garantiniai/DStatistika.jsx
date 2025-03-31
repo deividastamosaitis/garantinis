@@ -103,6 +103,9 @@ const DStatistika = () => {
                 Klientas
               </th>
               <th scope="col" className="px-6 py-3">
+                Telefonas
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Atsiskaitymas
               </th>
               <th scope="col" className="px-6 py-3">
@@ -113,6 +116,9 @@ const DStatistika = () => {
               </th>
               <th scope="col" className="px-6 py-3">
                 Sąskaita
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Kvitas
               </th>
               <th scope="col" className="px-6 py-3">
                 Sukūrė
@@ -132,6 +138,7 @@ const DStatistika = () => {
                 kKaina={pirkejas.totalKaina}
                 krepselis={pirkejas.prekes}
                 saskaita={pirkejas.saskaita}
+                kvitas={pirkejas.kvitas}
                 createdBy={pirkejas.createdBy}
                 createdAt={pirkejas.createdAt}
               />
