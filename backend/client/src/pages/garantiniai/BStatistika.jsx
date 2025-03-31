@@ -130,6 +130,9 @@ const BStatistika = () => {
                 Klientas
               </th>
               <th scope="col" className="px-6 py-3">
+                Telefonas
+              </th>
+              <th scope="col" className="px-6 py-3">
                 Atsiskaitymas
               </th>
               <th scope="col" className="px-6 py-3">
