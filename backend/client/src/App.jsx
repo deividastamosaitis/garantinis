@@ -11,6 +11,7 @@ import Klientai from "./pages/Klientai";
 import Prekes from "./pages/Prekes";
 import Login from "./pages/users/Login";
 import Register from "./pages/users/Register";
+import Atnaujinimai from "./pages/Atnaujinimai";
 import Home from "./pages/Home";
 import Pildyti from "./pages/garantiniai/Pildyti";
 import PStatistika from "./pages/garantiniai/PStatistika";
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
         element: <Layout />,
         loader: userLoader,
         children: [
+          { index: true, element: <Atnaujinimai /> },
           { path: "pildyti", element: <Pildyti /> },
           {
             path: "d_statistika",

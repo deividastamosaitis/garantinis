@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useLoaderData, redirect } from "react-router-dom";
+import { useState } from "react";
 import customFetch from "../utils/customFetch.js";
 
 export const loader = async () => {
@@ -59,7 +60,7 @@ const Layout = () => {
 
   return (
     <>
-      <header>Header</header>
+      <header></header>
 
       <button
         data-drawer-target="logo-sidebar"

@@ -170,7 +170,6 @@ const Pildyti = () => {
           {pranesimas}
         </div>
       )}
-
       <form className="p-6">
         <div className="grid gap-6 mb-6 md:grid-cols-6">
           {forma.map((row, index) => (

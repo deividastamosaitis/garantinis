@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import customFetch from "../utils/customFetch";
 import { toast } from "react-toastify";
 
@@ -18,6 +18,7 @@ const Klientai = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const navigate = useNavigate();
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -35,6 +36,13 @@ const Klientai = () => {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const handleEdit = (garantinisId, productId = null) => {
+    // Navigate to edit page with both garantinisId and productId if available
+    navigate(
+      `../garantinis/${garantinisId}${productId ? `?product=${productId}` : ""}`
+    );
   };
 
   return (
@@ -64,9 +72,24 @@ const Klientai = () => {
           {searchResults.searchType === "serial" &&
           searchResults.specificProduct ? (
             <div className="bg-base-200 p-4 rounded-lg mb-4">
-              <h2 className="text-xl font-semibold mb-2">
-                Prekės pagal serijos numerį
-              </h2>
+              <div className="flex justify-between items-start">
+                <h2 className="text-xl font-semibold mb-2">
+                  Prekės pagal serijos numerį
+                </h2>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      handleEdit(
+                        searchResults.specificProduct.garantinisId,
+                        searchResults.specificProduct._id
+                      )
+                    }
+                    className="btn btn-sm btn-warning"
+                  >
+                    Redaguoti
+                  </button>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="font-medium">Prekė:</p>
@@ -157,6 +180,7 @@ const Klientai = () => {
                       {searchResults.searchType === "serial" && (
                         <th>Klientas</th>
                       )}
+                      <th>Veiksmai</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -181,6 +205,16 @@ const Klientai = () => {
                               ` (${product.clientInfo.telefonas})`}
                           </td>
                         )}
+                        <td className="flex gap-2 justify-center">
+                          <button
+                            onClick={() =>
+                              handleEdit(product.garantinisId, product._id)
+                            }
+                            className="btn btn-sm btn-warning"
+                          >
+                            Redaguoti
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -200,7 +234,7 @@ const Klientai = () => {
         </div>
       ) : (
         <div>
-          <h2 className="text-xl font-semibold mb-4">Šiandienos garantiniai</h2>
+          <h2 className="text-xl font-semibold mb-4">Rezultatai</h2>
           {/* Display today's garantinis here */}
         </div>
       )}
