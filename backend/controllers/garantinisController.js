@@ -166,6 +166,7 @@ export const searchGarantinisByClient = async (req, res) => {
       $or: [
         { "klientas.vardas": { $regex: searchTerm, $options: "i" } },
         { "klientas.telefonas": { $regex: searchTerm, $options: "i" } },
+        { "prekes.serial": { $regex: searchTerm, $options: "i" } },
       ],
     })
       .populate("createdBy", "vardas email")
@@ -174,20 +175,58 @@ export const searchGarantinisByClient = async (req, res) => {
     if (garantinis.length === 0) {
       return res.status(StatusCodes.OK).json({
         success: true,
-        message: "No purchases found for this client",
+        message: "No purchases found matching the search",
         products: [],
         totalValue: 0,
         clientInfo: null,
+        searchType: null,
       });
     }
 
-    // Extract client info from the first matching record (assuming same client)
-    const clientInfo = garantinis[0].klientas;
+    // Determine search type (client or serial number)
+    let searchType = "client";
+    const isSerialSearch = garantinis.some((garantinisItem) =>
+      garantinisItem.prekes.some(
+        (product) =>
+          product.serial &&
+          product.serial.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    if (isSerialSearch) {
+      searchType = "serial";
+    }
+
+    // Extract client info (for client search) or product info (for serial search)
+    let clientInfo = null;
+    let specificProduct = null;
+
+    if (searchType === "client") {
+      clientInfo = garantinis[0].klientas;
+    } else {
+      // Find the specific product that matched the serial number
+      for (const garantinisItem of garantinis) {
+        const foundProduct = garantinisItem.prekes.find(
+          (product) =>
+            product.serial &&
+            product.serial.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        if (foundProduct) {
+          specificProduct = {
+            ...(foundProduct.toObject ? foundProduct.toObject() : foundProduct),
+            purchaseDate: garantinisItem.createdAt,
+            garantinisId: garantinisItem._id,
+            clientInfo: garantinisItem.klientas,
+          };
+          break;
+        }
+      }
+    }
 
     // Extract all products and calculate total value
     let totalValue = 0;
     const allProducts = garantinis.reduce((acc, garantinisItem) => {
-      const productsWithDate = garantinisItem.prekes.map((product) => {
+      const productsWithInfo = garantinisItem.prekes.map((product) => {
         const productValue = product.kaina || 0;
         totalValue += productValue;
 
@@ -195,9 +234,21 @@ export const searchGarantinisByClient = async (req, res) => {
           ...(product.toObject ? product.toObject() : product),
           purchaseDate: garantinisItem.createdAt,
           garantinisId: garantinisItem._id,
+          clientInfo: garantinisItem.klientas,
         };
       });
-      return acc.concat(productsWithDate);
+
+      // For serial search, only include matching products
+      if (searchType === "serial") {
+        return acc.concat(
+          productsWithInfo.filter(
+            (product) =>
+              product.serial &&
+              product.serial.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+        );
+      }
+      return acc.concat(productsWithInfo);
     }, []);
 
     res.status(StatusCodes.OK).json({
@@ -205,12 +256,14 @@ export const searchGarantinisByClient = async (req, res) => {
       products: allProducts,
       totalValue,
       clientInfo,
-      purchaseCount: garantinis.length, // Number of purchase records
+      specificProduct,
+      searchType,
+      purchaseCount: garantinis.length,
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Error searching client purchases",
+      message: "Error searching purchases",
       error: error.message,
     });
   }
