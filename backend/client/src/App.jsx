@@ -19,6 +19,7 @@ import DStatistika from "./pages/garantiniai/DStatistika";
 import BStatistika from "./pages/garantiniai/BStatistika";
 import KStatistika from "./pages/garantiniai/KStatistika";
 import EditGarantinis from "./pages/garantiniai/EditGarantinis";
+import Konkursas from "./pages/Konkursas";
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
 import { action as prekeAction } from "./pages/Prekes";
@@ -29,6 +30,7 @@ import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
 import { loader as userLoader } from "./pages/Layout";
 import { loader as garantinisLoader } from "./pages/garantiniai/EditGarantinis";
 import { loader as klientaiLoader } from "./pages/Klientai";
+import { loader as konkursasLoader } from "./pages/Konkursas";
 import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
@@ -91,6 +93,11 @@ const router = createBrowserRouter([
             element: <EditGarantinis />,
             loader: garantinisLoader,
             action: garantinisAction,
+          },
+          {
+            path: "konkursas",
+            element: <Konkursas />,
+            loader: konkursasLoader,
           },
         ],
       },
