@@ -31,6 +31,7 @@ import { loader as userLoader } from "./pages/Layout";
 import { loader as garantinisLoader } from "./pages/garantiniai/EditGarantinis";
 import { loader as klientaiLoader } from "./pages/Klientai";
 import { loader as konkursasLoader } from "./pages/Konkursas";
+import { loader as statistikaLoader } from "./pages/garantiniai/PStatistika";
 import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
           {
             path: "p_statistika",
             element: <PStatistika />,
+            loader: statistikaLoader,
           },
           {
             path: "b_statistika",

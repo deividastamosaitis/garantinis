@@ -10,12 +10,14 @@ import {
   getTodayGarantinis,
   deleteGarantinis,
   searchGarantinisByClient,
+  getSalesStatistics,
 } from "../controllers/garantinisController.js";
 import { validateGarantinisIdParam } from "../middlewares/validationMiddleware.js";
 
 router.route("/").post(createGarantinis).get(getAllGarantinis);
 router.route("/today").get(getTodayGarantinis);
 router.route("/search").get(searchGarantinisByClient);
+router.route("/statistics").get(getSalesStatistics);
 
 router
   .route("/:id")

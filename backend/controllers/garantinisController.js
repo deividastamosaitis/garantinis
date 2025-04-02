@@ -268,3 +268,50 @@ export const searchGarantinisByClient = async (req, res) => {
     });
   }
 };
+
+export const getSalesStatistics = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // Validate dates
+    if (!startDate || !endDate) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Nurodykite pradžios ir pabaigos datas",
+      });
+    }
+
+    const dateFilter = {
+      createdAt: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      },
+    };
+
+    // Sales by product aggregation
+    const salesByProduct = await Garantinis.aggregate([
+      { $match: dateFilter },
+      { $unwind: "$prekes" },
+      {
+        $group: {
+          _id: "$prekes.pavadinimas",
+          count: { $sum: 1 },
+          totalRevenue: { $sum: "$prekes.kaina" },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      salesByProduct,
+      dateRange: { startDate, endDate },
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Nepavyko gauti statistikos",
+      error: error.message,
+    });
+  }
+};
