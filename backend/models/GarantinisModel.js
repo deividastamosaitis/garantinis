@@ -17,46 +17,52 @@ const GarantinisPrekeSchema = new mongoose.Schema({
   },
 });
 
-const GarantinisSchema = new mongoose.Schema(
-  {
-    klientas: {
-      vardas: {
-        type: String,
-        required: true,
-      },
-      telefonas: {
-        type: String,
-        required: true,
-      },
-      miestas: {
-        type: String,
-        default: "Kaunas",
-      },
-    },
-    prekes: [GarantinisPrekeSchema],
-    kvitas: {
-      type: String,
-      required: false,
-    },
-    atsiskaitymas: {
+const GarantinisSchema = new mongoose.Schema({
+  klientas: {
+    vardas: {
       type: String,
       required: true,
     },
-    saskaita: {
+    telefonas: {
       type: String,
-    },
-    totalKaina: {
-      type: Number,
       required: true,
     },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Nuoroda į User modelį
-      required: true,
+    miestas: {
+      type: String,
+      default: "Kaunas",
     },
   },
-  { timestamps: true }
-);
+  prekes: [GarantinisPrekeSchema],
+  kvitas: {
+    type: String,
+    required: false,
+  },
+  atsiskaitymas: {
+    type: String,
+    required: true,
+  },
+  saskaita: {
+    type: String,
+  },
+  totalKaina: {
+    type: Number,
+    required: true,
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // Nuoroda į User modelį
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    required: true,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 const Garantinis = mongoose.model("Garantinis", GarantinisSchema);
 

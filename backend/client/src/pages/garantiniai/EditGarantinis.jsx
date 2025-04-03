@@ -43,7 +43,10 @@ export const action = async ({ request, params }) => {
     kvitas: formData.get("kvitas"),
     prekes: [],
     totalKaina: parseFloat(formData.get("totalKaina")) || 0,
+    createdAt: new Date(formData.get("createdAt")),
   };
+
+  console.log("Prepared updates:", updates);
 
   let index = 0;
   while (true) {
@@ -204,6 +207,18 @@ const EditGarantinis = () => {
               className="w-full p-2 border rounded"
             />
           </div>
+        </div>
+        <div>
+          <label className="block mb-1">Sukūrimo data:</label>
+          <input
+            type="datetime-local"
+            name="createdAt"
+            defaultValue={new Date(garantinis.createdAt)
+              .toISOString()
+              .slice(0, 16)}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
 
         {/* Total price display */}

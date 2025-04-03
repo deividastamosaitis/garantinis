@@ -141,6 +141,7 @@ const DStatistika = () => {
                 kvitas={pirkejas.kvitas}
                 createdBy={pirkejas.createdBy}
                 createdAt={pirkejas.createdAt}
+                originalDate={pirkejas.originalDate}
               />
             ))}
           </tbody>

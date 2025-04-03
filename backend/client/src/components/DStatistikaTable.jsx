@@ -10,8 +10,10 @@ const DStatistikaTable = ({
   kvitas,
   createdBy,
   createdAt,
+  originalDate,
 }) => {
   const date = new Date(createdAt);
+  const pakeistadate = new Date(originalDate);
   const isValidDate = !isNaN(date.getTime());
 
   return (
