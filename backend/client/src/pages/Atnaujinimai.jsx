@@ -7,6 +7,18 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 04 11",
+      type: "Atnaujinimas",
+      title: "Alkotesteriai",
+      description: "Alkotesterių kalibravimo vedimas, metam exceli nafik",
+      highlights: [
+        "Suvedus kontaktą atsinaujinam buseną butinai,",
+        "Vėliau galima bus siųsti SMS tiesiogiai per čia, paspaudus vieną knopkę (teksto rašyt nereiks)",
+        "Viskas vienoj vietoj, niekur blaškytis nereikia",
+      ],
+    },
+    {
+      id: 2,
       date: "2025 03 31",
       type: "Atnaujinimas",
       title: "Klientų paieška",
