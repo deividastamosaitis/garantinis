@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import Prekes from "../models/PrekeModel.js";
 import Klientai from "../models/KlientasModel.js";
 import Garantinis from "../models/GarantinisModel.js";
+import Alkotesteris from "../models/AlkotesterisModel.js";
 
 const withValidationErrors = (validateValues) => {
   return [
@@ -130,3 +131,22 @@ export const validateUpdateUserInput = withValidationErrors([
     }),
   body("pavarde").notEmpty().withMessage("Butina pavarde"),
 ]);
+
+export const validateAlkotesterisIdParam = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "Netinkamas alkotesterio ID formatas" });
+  }
+
+  const alkotesteris = await Alkotesteris.findById(id);
+  if (!alkotesteris) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: `Alkotesteris su ID ${id} nerastas` });
+  }
+
+  next();
+};
