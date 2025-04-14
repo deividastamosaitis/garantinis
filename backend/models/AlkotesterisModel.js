@@ -11,6 +11,7 @@ const AlkotesterisSchema = new mongoose.Schema({
     enum: ["registruota", "kalibruojama", "grįžęs", "atiduota"],
     default: "registruota",
   },
+  info: { type: String, required: false },
   lastUpdated: { type: Date, default: Date.now },
 });
 

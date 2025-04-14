@@ -1,4 +1,4 @@
-import { Form, useLoaderData } from "react-router-dom";
+import { Form, useLoaderData, useNavigate } from "react-router-dom";
 import customFetch from "../utils/customFetch";
 import { toast } from "react-toastify";
 
@@ -28,12 +28,18 @@ export const updateAlkotesterisAction = async ({ request, params }) => {
 
 export default function RedaguotiAlkotesteri() {
   const { alkotesteris } = useLoaderData();
+  const navigate = useNavigate();
+
+  const handleSubmit = () => {
+    navigate(-1);
+    setTimeout(() => window.location.reload(), 100);
+  };
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Redaguoti alkotesterį</h1>
 
-      <Form method="patch" className="max-w-md">
+      <Form method="patch" className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="mb-4">
           <label className="block mb-2">Alkotesterio pavadinimas</label>
           <input
@@ -77,9 +83,20 @@ export default function RedaguotiAlkotesteri() {
             required
           />
         </div>
+        <div className="mb-4">
+          <label className="block mb-2">Papildoma info</label>
+          <input
+            type="text"
+            name="info"
+            defaultValue={alkotesteris.info}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
 
         <button
           type="submit"
+          onClick={handleSubmit}
           className="mt-4 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
         >
           Išsaugoti pakeitimus

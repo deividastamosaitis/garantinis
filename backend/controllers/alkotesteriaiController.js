@@ -86,7 +86,7 @@ export const updateAlkotesterisStatus = async (req, res) => {
   try {
     const updatedAlkotesteris = await Alkotesteris.findByIdAndUpdate(
       id,
-      { status, lastUpdated: Date.now() },
+      { status },
       { new: true }
     );
 

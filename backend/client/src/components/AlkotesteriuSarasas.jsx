@@ -5,6 +5,19 @@ import { formatDate } from "../utils/formatDate";
 export default function AlkotesteriuSarasas({ alkotesteriai }) {
   const statusOptions = ["registruota", "kalibruojama", "grįžęs", "atiduota"];
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "atiduota":
+        return "bg-green-100"; // Žalia
+      case "kalibruojama":
+        return "bg-blue-100"; // Mėlyna
+      case "grįžęs":
+        return "bg-yellow-100"; // Geltona
+      default:
+        return ""; // Nėra spalvos (registruota)
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full bg-white border">
@@ -16,12 +29,16 @@ export default function AlkotesteriuSarasas({ alkotesteriai }) {
             <th className="py-2 px-4 border">Klientas</th>
             <th className="py-2 px-4 border">Tel. nr.</th>
             <th className="py-2 px-4 border">Būsena</th>
+            <th className="py-2 px-4 border">Papildoma info</th>
             <th className="py-2 px-4 border">Veiksmai</th>
           </tr>
         </thead>
         <tbody>
           {alkotesteriai?.map((alkotesteris) => (
-            <tr key={alkotesteris._id}>
+            <tr
+              key={alkotesteris._id}
+              className={getStatusColor(alkotesteris.status)}
+            >
               <td className="py-2 px-4 border">
                 {formatDate(alkotesteris.registrationDate)}
               </td>
@@ -48,6 +65,7 @@ export default function AlkotesteriuSarasas({ alkotesteriai }) {
                   </select>
                 </Form>
               </td>
+              <td className="py-2 px-4 border">{alkotesteris.info}</td>
               <td className="py-2 px-4 border flex gap-2">
                 <Link
                   to={`/garantinis/alkotesteriai/${alkotesteris._id}/redaguoti`}

@@ -70,14 +70,14 @@ const Alkotesteriai = () => {
         <AlkotesterioForma />
       </div>
 
+      <Outlet />
+
       <div>
         <h2 className="text-xl font-semibold mb-4">
           Registruoti alkotesteriai
         </h2>
         <AlkotesteriuSarasas alkotesteriai={alkotesteriai} />
       </div>
-
-      <Outlet />
     </div>
   );
 };

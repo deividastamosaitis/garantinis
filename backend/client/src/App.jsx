@@ -21,7 +21,6 @@ import KStatistika from "./pages/garantiniai/KStatistika";
 import EditGarantinis from "./pages/garantiniai/EditGarantinis";
 import Konkursas from "./pages/Konkursas";
 import Alkotesteriai from "./pages/Alkotesteriai";
-import SiandienosAlkotesteriai from "./pages/SiandienosAlkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
@@ -42,7 +41,6 @@ import { loader as klientaiLoader } from "./pages/Klientai";
 import { loader as konkursasLoader } from "./pages/Konkursas";
 import { loader as statistikaLoader } from "./pages/garantiniai/PStatistika";
 import { loader as alkotesteriaiLoader } from "./pages/Alkotesteriai";
-import { loader as todayAlkotesteriaiLoader } from "./pages/SiandienosAlkotesteriai";
 import { loader as alkotesterisLoader } from "./pages/RedaguotiAlkotesteri";
 import Landing from "./pages/Landing";
 
@@ -114,11 +112,6 @@ const router = createBrowserRouter([
             loader: alkotesteriaiLoader,
             action: createAlkotesterisAction,
             children: [
-              {
-                path: "siandien",
-                element: <SiandienosAlkotesteriai />,
-                loader: todayAlkotesteriaiLoader,
-              },
               {
                 path: ":id/redaguoti",
                 element: <RedaguotiAlkotesteri />,
