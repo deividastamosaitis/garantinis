@@ -22,6 +22,18 @@ import EditGarantinis from "./pages/garantiniai/EditGarantinis";
 import Konkursas from "./pages/Konkursas";
 import Alkotesteriai from "./pages/Alkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
+
+//RMA importai
+import RMAList from "./pages/rma/RMAList";
+import RMADetails from "./pages/rma/RMADetails";
+import RMACreate from "./pages/rma/RMACreate";
+import RMAEdit from "./pages/rma/RMAEdit";
+
+//RMA actionai
+import { action as rmaCreateAction } from "./pages/rma/RMACreate";
+import { action as rmaUpdateAction } from "./pages/rma/RMAEdit";
+import { action as rmaDeleteAction } from "./pages/rma/RMADelete";
+
 import { action as registerAction } from "./pages/users/Register";
 import { action as loginAction } from "./pages/users/Login";
 import { action as prekeAction } from "./pages/Prekes";
@@ -32,6 +44,12 @@ import {
   updateStatusAction,
   deleteAlkotesterisAction,
 } from "./pages/Alkotesteriai";
+
+//RMA loaderiai
+import { loader as rmaListLoader } from "./pages/rma/RMAList";
+import { loader as rmaDetailsLoader } from "./pages/rma/RMADetails";
+import { loader as rmaEditLoader } from "./pages/rma/RMAEdit";
+
 import { loader as allPrekesLoader } from "./pages/Prekes";
 import { loader as DStatistikaLoader } from "./pages/garantiniai/DStatistika";
 import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
@@ -125,6 +143,36 @@ const router = createBrowserRouter([
               {
                 path: ":id/istrinti",
                 action: deleteAlkotesterisAction,
+              },
+            ],
+          },
+          {
+            path: "rma",
+            children: [
+              {
+                index: true,
+                element: <RMAList />,
+                loader: rmaListLoader,
+              },
+              {
+                path: "create",
+                element: <RMACreate />, // Elementas pridedamas
+                action: rmaCreateAction,
+              },
+              {
+                path: ":id",
+                element: <RMADetails />,
+                loader: rmaDetailsLoader,
+              },
+              {
+                path: ":id/edit",
+                element: <RMAEdit />, // Elementas pridedamas
+                action: rmaUpdateAction,
+                loader: rmaEditLoader,
+              },
+              {
+                path: ":id/delete",
+                action: rmaDeleteAction, // Tik action - OK, nes tai POST/DELETE
               },
             ],
           },

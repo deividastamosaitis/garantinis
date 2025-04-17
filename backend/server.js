@@ -13,6 +13,7 @@ import { userRouter } from "./routes/userRouter.js";
 import KlientasRouter from "./routes/klientasRouter.js";
 import GarantinisRouter from "./routes/garantinisRouter.js";
 import AlkotesterisRouter from "./routes/alkotesteriaiRouter.js";
+import RMARouter from "./routes/rmaRouter.js";
 
 //middleware
 import errorHandlerMiddleware from "./middlewares/errorHandlerMiddleware.js";
@@ -40,6 +41,7 @@ app.use("/api/users", authenticateUser, userRouter);
 app.use("/api/klientai", authenticateUser, KlientasRouter);
 app.use("/api/garantinis", authenticateUser, GarantinisRouter);
 app.use("/api/alkotesteriai", authenticateUser, AlkotesterisRouter);
+app.use("/api/rma", authenticateUser, RMARouter);
 app.use("/api/auth", authRouter);
 
 app.get("*", (req, res) => {
