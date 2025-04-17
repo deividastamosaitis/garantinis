@@ -1,4 +1,4 @@
-import { useLoaderData, Link } from "react-router-dom";
+import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 
@@ -14,12 +14,53 @@ export const loader = async ({ request }) => {
 
 const RMAList = () => {
   const { products } = useLoaderData();
+  const navigate = useNavigate();
 
   const statusColors = {
     registered: "bg-blue-100 text-blue-800",
     sent: "bg-yellow-100 text-yellow-800",
     returned: "bg-green-100 text-green-800",
     credit: "bg-purple-100 text-purple-800",
+  };
+
+  const handleDelete = async (id) => {
+    // Patvirtinimo toast
+    toast.warning(
+      <div>
+        <p className="mb-2">Ar tikrai norite ištrinti šį RMA įrašą?</p>
+        <div className="flex gap-2">
+          <button
+            className="px-3 py-1 bg-red-500 text-white rounded"
+            onClick={() => {
+              deleteProduct(id);
+              toast.dismiss();
+            }}
+          >
+            Taip, ištrinti
+          </button>
+          <button
+            className="px-3 py-1 bg-gray-300 rounded"
+            onClick={() => toast.dismiss()}
+          >
+            Atšaukti
+          </button>
+        </div>
+      </div>,
+      {
+        autoClose: false,
+        closeButton: false,
+      }
+    );
+  };
+
+  const deleteProduct = async (id) => {
+    try {
+      await customFetch.delete(`/rma/${id}`);
+      toast.success("RMA įrašas sėkmingai ištrintas");
+      navigate("/garantinis/rma"); // Perkrauti puslapį, kad atnaujintų sąrašą
+    } catch (error) {
+      toast.error("Nepavyko ištrinti RMA įrašo");
+    }
   };
 
   return (
@@ -74,12 +115,12 @@ const RMAList = () => {
                   >
                     Daugiau
                   </Link>
-                  <Link
-                    to={`${product._id}/delete`}
+                  <button
+                    onClick={() => handleDelete(product._id)}
                     className="bg-red-200 px-3 py-1 rounded"
                   >
                     Ištrinti
-                  </Link>
+                  </button>
                 </td>
               </tr>
             ))}

@@ -4,11 +4,14 @@ import { toast } from "react-toastify";
 
 export const action = async ({ params }) => {
   try {
-    await customFetch.delete(`/rma/${params.id}`);
+    await customFetch.delete(`/api/rma/${params.id}`);
     toast.success("RMA įrašas sėkmingai ištrintas");
-    return redirect("/garantinis/rma");
+    return {
+      success: true,
+      redirect: "/garantinis/rma",
+    };
   } catch (error) {
-    toast.error("Klaida trinant RMA įrašą");
-    return error;
+    toast.error(error?.response?.data?.msg || "Klaida trinant RMA įrašą");
+    return { success: false };
   }
 };
