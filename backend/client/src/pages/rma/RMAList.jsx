@@ -79,10 +79,11 @@ const RMAList = () => {
             <tr>
               <th className="py-2 px-4 border">Data</th>
               <th className="py-2 px-4 border">Prekės SN</th>
+              <th className="py-2 px-4 border">Prekė</th>
               <th className="py-2 px-4 border">Klientas</th>
               <th className="py-2 px-4 border">Telefonas</th>
               <th className="py-2 px-4 border">Būsena</th>
-              <th className="py-2 px-4 border">Eproma būsena</th>
+              <th className="py-2 px-4 border">RMA</th>
               <th className="py-2 px-4 border">Veiksmai</th>
             </tr>
           </thead>
@@ -93,6 +94,7 @@ const RMAList = () => {
                   {new Date(product.createdAt).toLocaleDateString()}
                 </td>
                 <td className="py-2 px-4 border">{product.serialNumber}</td>
+                <td className="py-2 px-4 border">{product.name}</td>
                 <td className="py-2 px-4 border">{product.customer.name}</td>
                 <td className="py-2 px-4 border">{product.customer.phone}</td>
                 <td className="py-2 px-4 border">
@@ -107,7 +109,7 @@ const RMAList = () => {
                     {product.status === "credit" && "Kreditas"}
                   </span>
                 </td>
-                <td className="py-2 px-4 border">{product.epromaStatus}</td>
+                <td className="py-2 px-4 border">{product.epromaRMA}</td>
                 <td className="py-2 px-4 border">
                   <Link
                     to={`${product._id}`}

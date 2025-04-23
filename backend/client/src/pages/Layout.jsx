@@ -30,6 +30,7 @@ export const loader = async () => {
 const Layout = () => {
   const navigate = useNavigate();
   const { user, garantinis, todaygarantinis } = useLoaderData();
+  const [isStatsDropdownOpen, setIsStatsDropdownOpen] = useState(false);
 
   const totalPayment = todaygarantinis
     .filter((item) => item.totalKaina)
@@ -119,18 +120,43 @@ const Layout = () => {
               </Link>
             </li>
             {user.user.role === "admin" && (
-              <>
-                <ul class="space-y-2 font-medium">
-                  <li className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                    <i className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white fa-solid fa-chart-pie"></i>
-                    <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
-                      Statistika
-                    </span>
-                    <span className="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
-                      Admin
-                    </span>
-                  </li>
-                  {/* This id matches data-collapse-toggle */}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setIsStatsDropdownOpen(!isStatsDropdownOpen)}
+                  class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                >
+                  <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white fa-solid fa-chart-pie"></i>
+                  <span class="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">
+                    Statistika
+                  </span>
+                  <span class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">
+                    Admin
+                  </span>
+                  <svg
+                    class={`w-3 h-3 transition-transform ${
+                      isStatsDropdownOpen ? "rotate-180" : ""
+                    }`}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                <ul
+                  id="dropdown-statistika"
+                  class={`${
+                    isStatsDropdownOpen ? "block" : "hidden"
+                  } py-2 space-y-2`}
+                >
                   <li>
                     <Link
                       to="/garantinis/k_statistika"
@@ -144,7 +170,7 @@ const Layout = () => {
                       to="/garantinis/p_statistika"
                       className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
-                      Prekių
+                      Prekių (bendra)
                     </Link>
                   </li>
                   <li>
@@ -156,7 +182,7 @@ const Layout = () => {
                     </Link>
                   </li>
                 </ul>
-              </>
+              </li>
             )}
 
             <li>
@@ -175,7 +201,9 @@ const Layout = () => {
               >
                 <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-tag"></i>
 
-                <span class="flex-1 ms-3 whitespace-nowrap">Prekės</span>
+                <span class="flex-1 ms-3 whitespace-nowrap">
+                  Prekės (BARCODE)
+                </span>
               </Link>
             </li>
             <li>
