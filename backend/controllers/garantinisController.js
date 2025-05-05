@@ -32,6 +32,68 @@ export const getTodayGarantinis = async (req, res) => {
   }
 };
 
+export const getStatistics = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Nurodykite pradžios ir pabaigos datas",
+      });
+    }
+
+    const dateFilter = {
+      createdAt: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      },
+    };
+
+    // Get total baskets count
+    const totalBaskets = await Garantinis.countDocuments(dateFilter);
+
+    // Get baskets by day
+    const basketsByDay = await Garantinis.aggregate([
+      { $match: dateFilter },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+          totalRevenue: { $sum: "$totalKaina" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Sales by product
+    const salesByProduct = await Garantinis.aggregate([
+      { $match: dateFilter },
+      { $unwind: "$prekes" },
+      {
+        $group: {
+          _id: "$prekes.pavadinimas",
+          count: { $sum: 1 },
+          totalRevenue: { $sum: "$prekes.kaina" },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      totalBaskets,
+      basketsByDay,
+      salesByProduct,
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Nepavyko gauti statistikos",
+      error: error.message,
+    });
+  }
+};
+
 export const createGarantinis = async (req, res) => {
   const { klientas, prekes, atsiskaitymas, kvitas, saskaita, totalKaina } =
     req.body;
