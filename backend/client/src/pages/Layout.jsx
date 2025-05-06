@@ -162,7 +162,7 @@ const Layout = () => {
                       to="/garantinis/k_statistika"
                       className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
-                      Klientų
+                      • Pardavimų statistika
                     </Link>
                   </li>
                   <li>
@@ -170,7 +170,7 @@ const Layout = () => {
                       to="/garantinis/p_statistika"
                       className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
-                      Prekių (bendra)
+                      • Prekių kiekiai (bendra)
                     </Link>
                   </li>
                   <li>
@@ -178,7 +178,7 @@ const Layout = () => {
                       to="/garantinis/b_statistika"
                       className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
-                      Bendra
+                      • Bendra statistika
                     </Link>
                   </li>
                 </ul>

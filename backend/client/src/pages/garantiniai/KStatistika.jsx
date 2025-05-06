@@ -110,13 +110,19 @@ const KStatistika = () => {
     return statistics.basketsByDay.map((item) => ({
       name: item._id,
       Krepšeliai: item.count,
-      Pajamos: item.totalRevenue,
+      "Bendra suma": item.totalRevenue,
+      Grynais: item.grynais,
+      Kortele: item.kortele,
+      Pavedimas: item.pavedimas,
+      Lizingas: item.lizingas,
+      "C.O.D": item.cod,
     }));
   };
 
   const dailyChartData = prepareDailyChartData();
   const topSalesData = prepareTopSalesData();
   const topRevenueData = prepareTopRevenueData();
+  console.log(new Date().getTimezoneOffset());
 
   // Saugus datos formatavimas
   const formatDate = (date) => {
@@ -215,16 +221,28 @@ const KStatistika = () => {
             <h2 className="text-lg font-semibold mb-4">
               Pardavimai pagal dieną
             </h2>
-            <div style={{ height: 400 }}>
+            <div style={{ height: 500 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dailyChartData}>
+                <BarChart
+                  data={dailyChartData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
+                  <XAxis
+                    dataKey="name"
+                    angle={-45}
+                    textAnchor="end"
+                    height={70}
+                  />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="Krepšeliai" fill="#ffc658" />
-                  <Bar dataKey="Pajamos" fill="#ff8042" />
+                  <Bar dataKey="Grynais" stackId="a" fill="#8884d8" />
+                  <Bar dataKey="Kortele" stackId="a" fill="#82ca9d" />
+                  <Bar dataKey="Pavedimas" stackId="a" fill="#ffc658" />
+                  <Bar dataKey="Lizingas" stackId="a" fill="#ff8042" />
+                  <Bar dataKey="C.O.D" stackId="a" fill="#0088FE" />
+                  <Bar dataKey="Bendra suma" fill="#FF0000" opacity={0.5} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -43,24 +43,79 @@ export const getStatistics = async (req, res) => {
       });
     }
 
+    // Tikslus datos filtro nustatymas su UTC laiku
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
     const dateFilter = {
       createdAt: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $gte: new Date(
+          Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
+        ),
+        $lte: new Date(
+          Date.UTC(
+            end.getFullYear(),
+            end.getMonth(),
+            end.getDate(),
+            23,
+            59,
+            59,
+            999
+          )
+        ),
       },
     };
 
     // Get total baskets count
     const totalBaskets = await Garantinis.countDocuments(dateFilter);
 
-    // Get baskets by day
+    // Get baskets by day with payment type breakdown
     const basketsByDay = await Garantinis.aggregate([
       { $match: dateFilter },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "+03:00",
+            },
+          },
           count: { $sum: 1 },
           totalRevenue: { $sum: "$totalKaina" },
+          grynais: {
+            $sum: {
+              $cond: [{ $eq: ["$atsiskaitymas", "grynais"] }, "$totalKaina", 0],
+            },
+          },
+          kortele: {
+            $sum: {
+              $cond: [{ $eq: ["$atsiskaitymas", "kortele"] }, "$totalKaina", 0],
+            },
+          },
+          pavedimas: {
+            $sum: {
+              $cond: [
+                { $eq: ["$atsiskaitymas", "pavedimas"] },
+                "$totalKaina",
+                0,
+              ],
+            },
+          },
+          lizingas: {
+            $sum: {
+              $cond: [
+                { $eq: ["$atsiskaitymas", "lizingas"] },
+                "$totalKaina",
+                0,
+              ],
+            },
+          },
+          cod: {
+            $sum: {
+              $cond: [{ $eq: ["$atsiskaitymas", "COD"] }, "$totalKaina", 0],
+            },
+          },
         },
       },
       { $sort: { _id: 1 } },
