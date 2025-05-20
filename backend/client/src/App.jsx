@@ -19,7 +19,6 @@ import DStatistika from "./pages/garantiniai/DStatistika";
 import BStatistika from "./pages/garantiniai/BStatistika";
 import KStatistika from "./pages/garantiniai/KStatistika";
 import EditGarantinis from "./pages/garantiniai/EditGarantinis";
-import Konkursas from "./pages/Konkursas";
 import Alkotesteriai from "./pages/Alkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
 
@@ -56,7 +55,6 @@ import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
 import { loader as userLoader } from "./pages/Layout";
 import { loader as garantinisLoader } from "./pages/garantiniai/EditGarantinis";
 import { loader as klientaiLoader } from "./pages/Klientai";
-import { loader as konkursasLoader } from "./pages/Konkursas";
 import { loader as statistikaLoader } from "./pages/garantiniai/PStatistika";
 import { loader as alkotesteriaiLoader } from "./pages/Alkotesteriai";
 import { loader as alkotesterisLoader } from "./pages/RedaguotiAlkotesteri";
@@ -175,11 +173,6 @@ const router = createBrowserRouter([
                 action: rmaDeleteAction, // Tik action - OK, nes tai POST/DELETE
               },
             ],
-          },
-          {
-            path: "konkursas",
-            element: <Konkursas />,
-            loader: konkursasLoader,
           },
         ],
       },

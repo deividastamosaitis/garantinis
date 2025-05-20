@@ -84,6 +84,7 @@ const RMAList = () => {
               <th className="py-2 px-4 border">Telefonas</th>
               <th className="py-2 px-4 border">Būsena</th>
               <th className="py-2 px-4 border">RMA</th>
+              <th className="py-2 px-4 border">Info</th>
               <th className="py-2 px-4 border">Veiksmai</th>
             </tr>
           </thead>
@@ -110,6 +111,7 @@ const RMAList = () => {
                   </span>
                 </td>
                 <td className="py-2 px-4 border">{product.epromaRMA}</td>
+                <td className="py-2 px-4 border">{product.additionalInfo}</td>
                 <td className="py-2 px-4 border">
                   <Link
                     to={`${product._id}`}

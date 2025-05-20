@@ -75,7 +75,7 @@ const BStatistika = () => {
   return (
     <>
       {/* Bendros sumos pagal atsiskaitymo būdą */}
-      <div className="grid grid-cols-3 ">
+      <div className="grid grid-cols-5 ">
         <div className="flex text-center h-20 bg-yellow-500 text-white font-bold items-center justify-center">
           <span>Pavedimu: </span>
           <span className="ml-1">
@@ -89,6 +89,14 @@ const BStatistika = () => {
         <div className="flex text-center h-20 bg-green-500 text-white font-bold items-center justify-center">
           <span>Grynais: </span>
           <span className="ml-1">{totalByPayment("grynais").toFixed(2)}€</span>
+        </div>
+        <div className="flex text-center h-20 bg-blue-500 text-white font-bold items-center justify-center">
+          <span>Lizingas: </span>
+          <span className="ml-1">{totalByPayment("lizingas").toFixed(2)}€</span>
+        </div>
+        <div className="flex text-center h-20 bg-gray-500 text-white font-bold items-center justify-center">
+          <span>COD: </span>
+          <span className="ml-1">{totalByPayment("COD").toFixed(2)}€</span>
         </div>
       </div>
       <div className="mb-4 mt-4">

@@ -178,7 +178,7 @@ const Layout = () => {
                       to="/garantinis/b_statistika"
                       className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
-                      • Bendra statistika
+                      • Pardavimų istorija
                     </Link>
                   </li>
                 </ul>
@@ -226,7 +226,7 @@ const Layout = () => {
                 <span class="flex-1 ms-3 whitespace-nowrap">Alkotesteriai</span>
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link
                 to="/garantinis/konkursas"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -235,7 +235,7 @@ const Layout = () => {
 
                 <span class="flex-1 ms-3 whitespace-nowrap">Konkursas</span>
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
       </aside>

@@ -69,7 +69,18 @@ export const getStatistics = async (req, res) => {
     // Get total baskets count
     const totalBaskets = await Garantinis.countDocuments(dateFilter);
 
-    // Get baskets by day with payment type breakdown
+    const totalRevenueResult = await Garantinis.aggregate([
+      { $match: dateFilter },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalKaina" },
+        },
+      },
+    ]);
+
+    const totalRevenue = totalRevenueResult[0]?.totalRevenue || 0;
+
     const basketsByDay = await Garantinis.aggregate([
       { $match: dateFilter },
       {
@@ -121,7 +132,6 @@ export const getStatistics = async (req, res) => {
       { $sort: { _id: 1 } },
     ]);
 
-    // Sales by product
     const salesByProduct = await Garantinis.aggregate([
       { $match: dateFilter },
       { $unwind: "$prekes" },
@@ -135,13 +145,14 @@ export const getStatistics = async (req, res) => {
       { $sort: { count: -1 } },
     ]);
 
-    res.status(StatusCodes.OK).json({
+    res.status(200).json({
       totalBaskets,
+      totalRevenue,
       basketsByDay,
       salesByProduct,
     });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    res.status(500).json({
       success: false,
       message: "Nepavyko gauti statistikos",
       error: error.message,

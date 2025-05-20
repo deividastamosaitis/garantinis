@@ -77,7 +77,7 @@ const DStatistika = () => {
         </button>
         <button
           className={`px-4 py-2 border rounded ${
-            filter === "kortele" ? "bg-blue-500 text-white" : "bg-gray-200"
+            filter === "lizingas" ? "bg-blue-500 text-white" : "bg-gray-200"
           }`}
           onClick={() => setFilter("lizingas")}
         >
@@ -85,7 +85,7 @@ const DStatistika = () => {
         </button>
         <button
           className={`px-4 py-2 border rounded ${
-            filter === "kortele" ? "bg-gray-500 text-white" : "bg-gray-200"
+            filter === "COD" ? "bg-gray-500 text-white" : "bg-gray-200"
           }`}
           onClick={() => setFilter("COD")}
         >

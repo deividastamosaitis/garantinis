@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "react-toastify";
@@ -17,15 +17,68 @@ export const loader = async () => {
   }
 };
 
+// Funkcija normalizuoti tekstą: pašalina diakritikus, pavertžia į mažąsias
+const normalize = (str) =>
+  str
+    ?.toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
 const PStatistika = () => {
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
-    date.setDate(1); // First day of current month
+    date.setDate(1);
     return date;
   });
   const [endDate, setEndDate] = useState(new Date());
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  //eksportinam i exceli
+  const exportToCSV = (data, filename = "statistika.csv") => {
+    if (!data || data.length === 0) return;
+
+    const headers = ["Prekė", "Kiekis", "Viso pajamų (€)"];
+    const rows = data.map((item) => [
+      `"${item._id}"`,
+      item.count,
+      item.totalRevenue.toFixed(2),
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    // Pridedam UTF-8 BOM ženklą į failo pradžią
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      filename || `statistika-${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Debouncing efektas
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
   const fetchStats = async () => {
     if (!startDate || !endDate) return;
@@ -54,6 +107,17 @@ const PStatistika = () => {
     e.preventDefault();
     fetchStats();
   };
+
+  // Filtruoti prekes pagal debounced paiešką
+  const filteredStats = useMemo(() => {
+    if (!debouncedSearchTerm) return stats;
+
+    const normalizedSearch = normalize(debouncedSearchTerm);
+
+    return stats.filter((product) =>
+      normalize(product._id || "").includes(normalizedSearch)
+    );
+  }, [debouncedSearchTerm, stats]);
 
   return (
     <div className="p-4">
@@ -102,6 +166,34 @@ const PStatistika = () => {
           </div>
         </div>
       </form>
+      {filteredStats.length > 0 && (
+        <div className="flex justify-between items-center mb-4">
+          <div className="w-full">
+            <label className="block text-sm font-medium mb-1">
+              Ieškoti prekės:
+            </label>
+            <input
+              type="text"
+              placeholder="Įveskite prekės pavadinimą"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          <button
+            onClick={() =>
+              exportToCSV(
+                filteredStats,
+                `statistika-${new Date().toISOString().slice(0, 10)}.csv`
+              )
+            }
+            className="ml-4 mt-6 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded"
+          >
+            Eksportuoti CSV
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <p className="text-center py-4">Kraunama...</p>
@@ -116,8 +208,8 @@ const PStatistika = () => {
               </tr>
             </thead>
             <tbody>
-              {stats.length > 0 ? (
-                stats.map((product, index) => (
+              {filteredStats.length > 0 ? (
+                filteredStats.map((product, index) => (
                   <tr
                     key={index}
                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
@@ -134,7 +226,7 @@ const PStatistika = () => {
               ) : (
                 <tr>
                   <td colSpan="3" className="py-4 text-center text-gray-500">
-                    Nerasta pardavimų pasirinktu laikotarpiu
+                    Nerasta prekių pagal paiešką
                   </td>
                 </tr>
               )}

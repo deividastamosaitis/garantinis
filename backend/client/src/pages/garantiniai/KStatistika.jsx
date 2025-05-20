@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Line,
 } from "recharts";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -107,6 +108,11 @@ const KStatistika = () => {
   };
 
   const prepareDailyChartData = () => {
+    const avg =
+      statistics.totalBaskets > 0
+        ? statistics.totalRevenue / statistics.totalBaskets
+        : 0;
+
     return statistics.basketsByDay.map((item) => ({
       name: item._id,
       Krepšeliai: item.count,
@@ -116,13 +122,13 @@ const KStatistika = () => {
       Pavedimas: item.pavedimas,
       Lizingas: item.lizingas,
       "C.O.D": item.cod,
+      Vidurkis: 50000,
     }));
   };
 
   const dailyChartData = prepareDailyChartData();
   const topSalesData = prepareTopSalesData();
   const topRevenueData = prepareTopRevenueData();
-  console.log(new Date().getTimezoneOffset());
 
   // Saugus datos formatavimas
   const formatDate = (date) => {
@@ -155,6 +161,19 @@ const KStatistika = () => {
           <div className="bg-gray-100 p-3 rounded">
             <p className="font-semibold">Bendra informacija:</p>
             <p>Krepšelių skaičius: {statistics.totalBaskets}</p>
+            <p>
+              Vidutinė krepšelio suma:{" "}
+              {statistics.totalBaskets > 0 ? (
+                <b>
+                  {(statistics.totalRevenue / statistics.totalBaskets).toFixed(
+                    2
+                  )}{" "}
+                  €
+                </b>
+              ) : (
+                "0 €"
+              )}
+            </p>
             <p>
               Laikotarpis: {formatDateForAPI(startDate)} -{" "}
               {formatDateForAPI(endDate)}

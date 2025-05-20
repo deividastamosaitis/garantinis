@@ -39,7 +39,6 @@ const Klientai = () => {
   };
 
   const handleEdit = (garantinisId, productId = null) => {
-    // Navigate to edit page with both garantinisId and productId if available
     navigate(
       `../garantinis/${garantinisId}${productId ? `?product=${productId}` : ""}`
     );
@@ -69,173 +68,110 @@ const Klientai = () => {
 
       {searchResults ? (
         <div>
-          {searchResults.searchType === "serial" &&
-          searchResults.specificProduct ? (
-            <div className="bg-base-200 p-4 rounded-lg mb-4">
-              <div className="flex justify-between items-start">
-                <h2 className="text-xl font-semibold mb-2">
-                  Prekės pagal serijos numerį
-                </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() =>
-                      handleEdit(
-                        searchResults.specificProduct.garantinisId,
-                        searchResults.specificProduct._id
-                      )
-                    }
-                    className="btn btn-sm btn-warning"
-                  >
-                    Redaguoti
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="font-medium">Prekė:</p>
-                  <p>{searchResults.specificProduct.pavadinimas}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Serijos numeris:</p>
-                  <p>{searchResults.specificProduct.serial}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Barkodas:</p>
-                  <p>{searchResults.specificProduct.barkodas}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Kaina:</p>
-                  <p>{searchResults.specificProduct.kaina?.toFixed(2)} €</p>
-                </div>
-                <div>
-                  <p className="font-medium">Pirkimo data:</p>
-                  <p>
-                    {new Date(
-                      searchResults.specificProduct.purchaseDate
-                    ).toLocaleDateString("lt-LT")}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium">Klientas:</p>
-                  <p>
-                    {searchResults.specificProduct.clientInfo?.vardas ||
-                      "Nežinomas"}
-                    {searchResults.specificProduct.clientInfo?.telefonas &&
-                      ` (${searchResults.specificProduct.clientInfo.telefonas})`}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : searchResults.clientInfo ? (
-            <div className="bg-base-200 p-4 rounded-lg mb-4">
-              <h2 className="text-xl font-semibold mb-2">
-                Kliento informacija
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="font-medium">Vardas:</p>
-                  <p>{searchResults.clientInfo.vardas}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Telefonas:</p>
-                  <p>{searchResults.clientInfo.telefonas}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Miestas:</p>
-                  <p>{searchResults.clientInfo.miestas || "-"}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Pirkimų skaičius:</p>
-                  <p>{searchResults.purchaseCount}</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <p className="font-medium">Bendra suma:</p>
-                <p className="text-lg font-bold">
-                  {searchResults.totalValue.toFixed(2)} €
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="alert alert-warning mb-4">Nieko nerasta</div>
-          )}
-
-          {searchResults.products.length > 0 && (
+          {searchResults.products?.length > 0 ? (
             <>
               <h2 className="text-xl font-semibold mb-4">
-                {searchResults.searchType === "serial"
-                  ? "Rasta prekė"
-                  : `${searchResults.products.length} prekės`}
+                Rasta: {searchResults.products.length}
               </h2>
 
-              <div className="overflow-x-auto">
-                <table className="table table-zebra w-full text-start">
-                  <thead>
-                    <tr className="text-center border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                      <th>Prekė</th>
-                      <th>Barkodas</th>
-                      <th>Serijos nr.</th>
-                      <th>Kaina</th>
-                      <th>Pirkimo data</th>
-                      {searchResults.searchType === "serial" && (
-                        <th>Klientas</th>
-                      )}
-                      <th>Veiksmai</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {searchResults.products.map((product, index) => (
-                      <tr
-                        className="text-center border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
-                        key={index}
-                      >
-                        <td>{product.pavadinimas}</td>
-                        <td>{product.barkodas}</td>
-                        <td>{product.serial}</td>
-                        <td>{product.kaina?.toFixed(2)} €</td>
-                        <td>
-                          {new Date(product.purchaseDate).toLocaleDateString(
-                            "lt-LT"
-                          )}
-                        </td>
-                        {searchResults.searchType === "serial" && (
-                          <td>
-                            {product.clientInfo?.vardas || "Nežinomas"}
-                            {product.clientInfo?.telefonas &&
-                              ` (${product.clientInfo.telefonas})`}
-                          </td>
-                        )}
-                        <td className="flex gap-2 justify-center">
-                          <button
-                            onClick={() =>
-                              handleEdit(product.garantinisId, product._id)
-                            }
-                            className="btn btn-sm btn-warning"
-                          >
-                            Redaguoti
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  {searchResults.searchType === "client" && (
-                    <tfoot>
-                      <tr className=" text-center border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <th>Viso:</th>
-                        <th>{searchResults.totalValue.toFixed(2)} €</th>
-                        <th></th>
-                      </tr>
-                    </tfoot>
-                  )}
-                </table>
+              {/* Grupavimas pagal garantinisId */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {Object.entries(
+                  searchResults.products.reduce((groups, product) => {
+                    const id = product.garantinisId;
+                    if (!groups[id]) groups[id] = [];
+                    groups[id].push(product);
+                    return groups;
+                  }, {})
+                ).map(([garantinisId, products], index) => {
+                  const firstProduct = products[0];
+                  const client = firstProduct.clientInfo || {};
+                  const date = new Date(
+                    firstProduct.purchaseDate
+                  ).toLocaleDateString("lt-LT");
+                  const totalSum = products.reduce(
+                    (acc, item) => acc + (item.kaina || 0),
+                    0
+                  );
+
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white shadow-md rounded-xl p-5 space-y-4 border border-gray-200"
+                    >
+                      {/* Header */}
+                      <div className="flex justify-between items-start border-b pb-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            {client.vardas || "Nežinomas"}{" "}
+                            {client.telefonas && (
+                              <span className="text-gray-500">
+                                ({client.telefonas})
+                              </span>
+                            )}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            Pirkimo data: {date}
+                          </p>
+                        </div>
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => handleEdit(garantinisId)}
+                        >
+                          Redaguoti
+                        </button>
+                      </div>
+
+                      {/* Prekių lentelė */}
+                      <div className="overflow-x-auto">
+                        <table className="table w-full table-sm divide-y divide-gray-200">
+                          <thead className="bg-gray-50 text-sm text-gray-600">
+                            <tr>
+                              <th className="py-2 px-3 text-left">Prekė</th>
+                              <th className="py-2 px-3 text-left">Barkodas</th>
+                              <th className="py-2 px-3 text-left">
+                                Serijos nr.
+                              </th>
+                              <th className="py-2 px-3 text-right">Kaina</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {products.map((p, i) => (
+                              <tr key={i} className="hover:bg-gray-50 text-sm">
+                                <td className="py-2 px-3">{p.pavadinimas}</td>
+                                <td className="py-2 px-3">{p.barkodas}</td>
+                                <td className="py-2 px-3">{p.serial}</td>
+                                <td className="py-2 px-3 text-right">
+                                  {p.kaina?.toFixed(2)} €
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-gray-50 text-sm font-semibold">
+                              <td className="py-2 px-3 text-right" colSpan={3}>
+                                Bendra suma:
+                              </td>
+                              <td className="py-2 px-3 text-right">
+                                {totalSum.toFixed(2)} €
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </>
+          ) : (
+            <div className="alert alert-warning mb-4">Nieko nerasta</div>
           )}
         </div>
       ) : (
         <div>
           <h2 className="text-xl font-semibold mb-4">Rezultatai</h2>
-          {/* Display today's garantinis here */}
+          {/* Čia gali rodyti šiandienos garantinius, jei nori */}
         </div>
       )}
     </div>

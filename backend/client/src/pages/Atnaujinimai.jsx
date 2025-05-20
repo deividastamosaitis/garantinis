@@ -7,6 +7,18 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 05 20",
+      type: "Atnaujinimas",
+      title: "Klientai",
+      description: "Patobulinta paieška, optimizuota",
+      highlights: [
+        "Suvedus kliento rekvizitų dali meta visus su tuo susijusius klientus,",
+        "Atnaujintas klientų atvaizdavimas, atskirtos prekės nuo klientų",
+        "Matoma kokia prekė priklauso klientui, galima iškart redaguoti krepšelį",
+      ],
+    },
+    {
+      id: 2,
       date: "2025 04 11",
       type: "Atnaujinimas",
       title: "Alkotesteriai",
@@ -17,8 +29,9 @@ const Atnaujinimai = () => {
         "Viskas vienoj vietoj, niekur blaškytis nereikia",
       ],
     },
+
     {
-      id: 2,
+      id: 3,
       date: "2025 03 31",
       type: "Atnaujinimas",
       title: "Klientų paieška",
