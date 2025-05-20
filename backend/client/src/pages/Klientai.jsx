@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import customFetch from "../utils/customFetch";
+import { User, Phone, Calendar, Euro, Pencil } from "lucide-react";
 import { toast } from "react-toastify";
 
 export const loader = async () => {
@@ -101,23 +102,27 @@ const Klientai = () => {
                     >
                       {/* Header */}
                       <div className="flex justify-between items-start border-b pb-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {client.vardas || "Nežinomas"}{" "}
-                            {client.telefonas && (
-                              <span className="text-gray-500">
-                                ({client.telefonas})
-                              </span>
-                            )}
-                          </h3>
-                          <p className="text-sm text-gray-500">
+                        <div className="space-y-1">
+                          <p className="flex items-center gap-2 text-gray-800 font-semibold text-base">
+                            <User size={16} />
+                            {client.vardas || "Nežinomas"}
+                          </p>
+                          {client.telefonas && (
+                            <p className="flex items-center gap-2 text-gray-600 text-sm">
+                              <Phone size={14} />
+                              {client.telefonas}
+                            </p>
+                          )}
+                          <p className="flex items-center gap-2 text-gray-500 text-sm">
+                            <Calendar size={14} />
                             Pirkimo data: {date}
                           </p>
                         </div>
                         <button
-                          className="btn btn-sm btn-warning"
+                          className="flex items-center gap-1 text-sm text-blue-700 border border-blue-400 px-2 py-1 rounded hover:bg-blue-100 transition"
                           onClick={() => handleEdit(garantinisId)}
                         >
+                          <Pencil size={14} />
                           Redaguoti
                         </button>
                       </div>
@@ -152,7 +157,8 @@ const Klientai = () => {
                               <td className="py-2 px-3 text-right" colSpan={3}>
                                 Bendra suma:
                               </td>
-                              <td className="py-2 px-3 text-right">
+                              <td className="py-2 px-3 text-right flex items-center justify-end gap-1 font-bold">
+                                <Euro size={14} />
                                 {totalSum.toFixed(2)} €
                               </td>
                             </tr>
