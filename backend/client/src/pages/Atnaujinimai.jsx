@@ -7,6 +7,16 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 05 21",
+      type: "Atnaujinimas",
+      title: "Garantinių pildymas",
+      description: "Galima dubliuoti suvesta prekę",
+      highlights: [
+        "Pašalinant prekę išmetamas patvirtinimas ar tikrai reikia pašalinti,",
+      ],
+    },
+    {
+      id: 1,
       date: "2025 05 20",
       type: "Atnaujinimas",
       title: "Klientai",
