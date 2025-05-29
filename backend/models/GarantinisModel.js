@@ -1,3 +1,4 @@
+// Atnaujinta garantinio schema su daugybine atsiskaitymo galimybe
 import mongoose from "mongoose";
 
 const GarantinisPrekeSchema = new mongoose.Schema({
@@ -17,6 +18,21 @@ const GarantinisPrekeSchema = new mongoose.Schema({
   },
 });
 
+const AtsiskaitymasSchema = new mongoose.Schema(
+  {
+    tipas: {
+      type: String,
+      enum: ["grynais", "kortele", "pavedimas", "COD", "lizingas"],
+      required: true,
+    },
+    suma: {
+      type: Number,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const GarantinisSchema = new mongoose.Schema({
   klientas: {
     vardas: {
@@ -35,10 +51,9 @@ const GarantinisSchema = new mongoose.Schema({
   prekes: [GarantinisPrekeSchema],
   kvitas: {
     type: String,
-    required: false,
   },
   atsiskaitymas: {
-    type: String,
+    type: [AtsiskaitymasSchema],
     required: true,
   },
   saskaita: {
@@ -50,7 +65,7 @@ const GarantinisSchema = new mongoose.Schema({
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Nuoroda į User modelį
+    ref: "User",
     required: true,
   },
   createdAt: {

@@ -15,6 +15,18 @@ const BStatistikaTable = ({
   const date = new Date(createdAt);
   const isValidDate = !isNaN(date.getTime());
 
+  // Normalizuotas atsiskaitymo tekstas
+  let atsiskaitymasText = "";
+  if (Array.isArray(atsiskaitymas)) {
+    atsiskaitymasText = atsiskaitymas
+      .map((a) => `${a.tipas} (${a.suma}€)`)
+      .join(", ");
+  } else if (typeof atsiskaitymas === "string") {
+    atsiskaitymasText = atsiskaitymas;
+  } else {
+    atsiskaitymasText = "Nenurodytas";
+  }
+
   return (
     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
       <td className="px-6 py-4">
@@ -31,7 +43,7 @@ const BStatistikaTable = ({
       </td>
       <td className="px-6 py-4">{klientas.vardas}</td>
       <td className="px-6 py-4">{klientas.telefonas}</td>
-      <td className="px-6 py-4">{atsiskaitymas}</td>
+      <td className="px-6 py-4">{atsiskaitymasText}</td>
       <td className="px-6 py-4">{kKaina}€</td>
       <td className="px-6 py-4">
         <ul>

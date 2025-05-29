@@ -22,7 +22,11 @@ const DStatistika = () => {
   const filteredData =
     filter === "all"
       ? garantinis
-      : garantinis.filter((item) => item.atsiskaitymas === filter);
+      : garantinis.filter((item) =>
+          Array.isArray(item.atsiskaitymas)
+            ? item.atsiskaitymas.some((ats) => ats.tipas === filter)
+            : item.atsiskaitymas === filter
+        );
 
   if (!Array.isArray(filteredData)) {
     console.error("filteredData nėra masyvas:", filteredData);
@@ -31,110 +35,74 @@ const DStatistika = () => {
 
   // Suskaičiuoti bendrą sumą pagal atsiskaitymo būdą
   const totalByPayment = (type) => {
-    return garantinis
-      .filter((item) => item.atsiskaitymas === type)
-      .reduce((sum, item) => sum + item.totalKaina, 0);
+    return garantinis.reduce((sum, item) => {
+      if (Array.isArray(item.atsiskaitymas)) {
+        const suma = item.atsiskaitymas
+          .filter((ats) => ats.tipas === type)
+          .reduce((s, ats) => s + (ats.suma || 0), 0);
+        return sum + suma;
+      } else if (item.atsiskaitymas === type) {
+        return sum + (item.totalKaina || 0);
+      }
+      return sum;
+    }, 0);
   };
-
   const totalPayment = garantinis
     .filter((item) => item.totalKaina)
     .reduce((sum, item) => sum + item.totalKaina, 0);
-
   return (
     <>
       <div className="flex gap-4 mb-4">
-        <button
-          className={`px-4 py-2 border rounded ${
-            filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("all")}
-        >
-          Visi
-        </button>
-        <button
-          className={`px-4 py-2 border rounded ${
-            filter === "pavedimas" ? "bg-yellow-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("pavedimas")}
-        >
-          Pavedimas
-        </button>
-        <button
-          className={`px-4 py-2 border rounded ${
-            filter === "grynais" ? "bg-green-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("grynais")}
-        >
-          Grynais
-        </button>
-        <button
-          className={`px-4 py-2 border rounded ${
-            filter === "kortele" ? "bg-red-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("kortele")}
-        >
-          Kortele
-        </button>
-        <button
-          className={`px-4 py-2 border rounded ${
-            filter === "lizingas" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("lizingas")}
-        >
-          Lizingas
-        </button>
-        <button
-          className={`px-4 py-2 border rounded ${
-            filter === "COD" ? "bg-gray-500 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("COD")}
-        >
-          C.O.D
-        </button>
+        {["all", "pavedimas", "grynais", "kortele", "lizingas", "COD"].map(
+          (type) => (
+            <button
+              key={type}
+              className={`px-4 py-2 border rounded ${
+                filter === type ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
+              onClick={() => setFilter(type)}
+            >
+              {type === "all"
+                ? "Visi"
+                : type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          )
+        )}
       </div>
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" className="px-6 py-3">
-                Data
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Klientas
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Telefonas
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Atsiskaitymas
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Kaina
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Prekės
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Sąskaita
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Kvitas
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Sukūrė
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Veiksmas
-              </th>
+              <th className="px-6 py-3">Data</th>
+              <th className="px-6 py-3">Klientas</th>
+              <th className="px-6 py-3">Telefonas</th>
+              <th className="px-6 py-3">Atsiskaitymas</th>
+              <th className="px-6 py-3">Kaina</th>
+              <th className="px-6 py-3">Prekės</th>
+              <th className="px-6 py-3">Sąskaita</th>
+              <th className="px-6 py-3">Kvitas</th>
+              <th className="px-6 py-3">Sukūrė</th>
+              <th className="px-6 py-3">Veiksmas</th>
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((pirkejas, index) => (
+            {filteredData.map((pirkejas) => (
               <DStatistikaTable
                 key={pirkejas._id}
                 _id={pirkejas._id}
                 klientas={pirkejas.klientas}
-                atsiskaitymas={pirkejas.atsiskaitymas}
+                atsiskaitymas={
+                  Array.isArray(pirkejas.atsiskaitymas)
+                    ? pirkejas.atsiskaitymas
+                    : typeof pirkejas.atsiskaitymas === "string"
+                    ? [
+                        {
+                          tipas: pirkejas.atsiskaitymas,
+                          suma: pirkejas.totalKaina,
+                        },
+                      ]
+                    : []
+                }
                 kKaina={pirkejas.totalKaina}
                 krepselis={pirkejas.prekes}
                 saskaita={pirkejas.saskaita}
@@ -147,7 +115,7 @@ const DStatistika = () => {
           </tbody>
         </table>
       </div>
-      {/* Bendras atsiskaitymų skaičius pagal būdą */}
+
       <div className="grid grid-cols-3 mt-4">
         <div className="flex text-center h-20 bg-yellow-500 text-white font-bold items-center justify-center">
           <span>Pavedimu: </span>

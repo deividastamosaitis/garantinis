@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const Pildyti = () => {
   const [pranesimas, setPranesimas] = useState(null);
-  const [atsiskaitymas, setAtsiskaitymas] = useState("");
+  const [atsiskaitymas, setAtsiskaitymas] = useState([{ tipas: "", suma: 0 }]);
   const [saskaita, setSaskaita] = useState("");
   const [kvitas, setKvitas] = useState("");
   const [forma, setForma] = useState([
@@ -90,6 +90,20 @@ const Pildyti = () => {
     }
   };
 
+  const handleAtsiskaitymasChange = (index, field, value) => {
+    const nauji = [...atsiskaitymas];
+    nauji[index][field] = field === "suma" ? parseFloat(value) || 0 : value;
+    setAtsiskaitymas(nauji);
+  };
+
+  const pridetiAtsiskaityma = () => {
+    setAtsiskaitymas([...atsiskaitymas, { tipas: "", suma: 0 }]);
+  };
+
+  const salintiAtsiskaityma = (index) => {
+    setAtsiskaitymas(atsiskaitymas.filter((_, i) => i !== index));
+  };
+
   const totalKaina = forma.reduce(
     (total, forma) => total + (forma.kaina || 0),
     0
@@ -101,6 +115,18 @@ const Pildyti = () => {
     const createdAt = new Date();
 
     setIsLoading(true);
+
+    const atsiskaitymuSuma = atsiskaitymas.reduce(
+      (sum, item) => sum + (item.suma || 0),
+      0
+    );
+    if (Math.abs(atsiskaitymuSuma - totalKaina) > 0.01) {
+      setPranesimas(
+        "Atsiskaitymų suma nesutampa su bendru krepšelio kainos suma."
+      );
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // First save/update all products
@@ -154,7 +180,7 @@ const Pildyti = () => {
         // Reset form
         setForma([{ barkodas: "", pavadinimas: "", serial: "", kaina: 0 }]);
         setKlientas({ vardas: "", telefonas: "", miestas: "Kaunas" });
-        setAtsiskaitymas("");
+        setAtsiskaitymas([{ tipas: "", suma: 0 }]);
         setSaskaita("");
         setKvitas("");
       } else {
@@ -354,29 +380,96 @@ const Pildyti = () => {
           </div>
 
           <div>
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Atsiskaitymo būdas
+            <div className="mb-6">
+              <label className="block mb-2 text-sm font-medium text-gray-900">
+                Atsiskaitymo būdai:
               </label>
-              <div className="flex">
-                <select
-                  value={atsiskaitymas}
-                  onChange={(e) => setAtsiskaitymas(e.target.value)}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  required
+              {atsiskaitymas.map((ats, index) => (
+                <div
+                  key={index}
+                  className="flex flex-wrap items-center gap-2 mb-2"
                 >
-                  <option value="" disabled>
-                    Pasirinkite atsiskaitymo būdą
-                  </option>
-                  <option value="grynais">Grynais</option>
-                  <option value="kortele">Kortele</option>
-                  <option value="pavedimas">Pavedimas</option>
-                  <option value="COD">COD</option>
-                  <option value="lizingas">Lizingas</option>
-                </select>
+                  <select
+                    value={ats.tipas}
+                    onChange={(e) =>
+                      handleAtsiskaitymasChange(index, "tipas", e.target.value)
+                    }
+                    className="flex-1 p-2 border rounded"
+                  >
+                    <option value="">Pasirinkti</option>
+                    <option value="grynais">Grynais</option>
+                    <option value="kortele">Kortele</option>
+                    <option value="pavedimas">Pavedimas</option>
+                    <option value="COD">COD</option>
+                    <option value="lizingas">Lizingas</option>
+                  </select>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={ats.suma}
+                    onChange={(e) =>
+                      handleAtsiskaitymasChange(index, "suma", e.target.value)
+                    }
+                    className="w-28 p-2 border rounded"
+                    placeholder="Suma €"
+                  />
+                  {atsiskaitymas.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => salintiAtsiskaityma(index)}
+                      className="text-red-600 text-sm"
+                    >
+                      Pašalinti
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              {/* Mygtukas pridėti atsiskaitymą */}
+              <button
+                type="button"
+                onClick={pridetiAtsiskaityma}
+                className="mt-2 text-sm text-blue-600"
+              >
+                + Pridėti atsiskaitymą
+              </button>
+
+              {/* Likusios sumos indikatorius */}
+              <div className="mt-2 text-sm font-medium">
+                {(() => {
+                  const bendraSuma = atsiskaitymas.reduce(
+                    (sum, a) => sum + parseFloat(a.suma || 0),
+                    0
+                  );
+                  const likutis = totalKaina - bendraSuma;
+                  return (
+                    <span
+                      className={
+                        likutis === 0 ? "text-green-600" : "text-orange-600"
+                      }
+                    >
+                      {likutis === 0
+                        ? "✅ Atsiskaitymo suma teisinga"
+                        : `❗Liko suvesti: ${likutis.toFixed(2)} €`}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
-
+          </div>
+          <div>
+            <div className="">
+              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Kvito nr.: (atsiskaičius kortele/grynais)
+              </label>
+              <input
+                type="text"
+                value={kvitas}
+                onChange={(e) => setKvitas(e.target.value)}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              />
+            </div>
             <div className="mt-4">
               <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                 Sąskaita (neprivaloma)
@@ -388,17 +481,6 @@ const Pildyti = () => {
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
             </div>
-          </div>
-          <div className="">
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Kvito nr.: (atsiskaičius kortele/grynais)
-            </label>
-            <input
-              type="text"
-              value={kvitas}
-              onChange={(e) => setKvitas(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            />
           </div>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">

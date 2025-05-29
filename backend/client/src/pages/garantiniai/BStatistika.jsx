@@ -16,18 +16,17 @@ export const loader = async () => {
 
 const BStatistika = () => {
   const navigate = useNavigate();
-  const { data } = useLoaderData(); // Gauti duomenis iš loader funkcijos
+  const { data } = useLoaderData();
   const garantinis = data.garantinis;
 
   const [startDate, setStartDate] = useState(
     new Date().toISOString().split("T")[0]
-  ); // Numatytasis pradžios datos įrašai
+  );
   const [endDate, setEndDate] = useState(
     new Date().toISOString().split("T")[0]
-  ); // Numatytasis pabaigos datos įrašai
+  );
   const [filteredData, setFilteredData] = useState([]);
 
-  // Filtruoti duomenis pagal pasirinktą laikotarpį
   useEffect(() => {
     const filtered = garantinis.filter((item) => {
       const itemDate = new Date(item.createdAt).toISOString().split("T")[0];
@@ -36,15 +35,25 @@ const BStatistika = () => {
     setFilteredData(filtered);
   }, [garantinis, startDate, endDate]);
 
-  // Suskaičiuoti bendrą sumą pagal atsiskaitymo būdą
+  // Naujas būdas suskaičiuoti sumas pagal atsiskaitymo būdus
   const totalByPayment = (type) => {
-    return filteredData
-      .filter((item) => item.atsiskaitymas === type)
-      .reduce((sum, item) => sum + item.totalKaina, 0);
+    return filteredData.reduce((sum, item) => {
+      if (Array.isArray(item.atsiskaitymas)) {
+        return (
+          sum +
+          item.atsiskaitymas
+            .filter((a) => a.tipas === type)
+            .reduce((s, a) => s + a.suma, 0)
+        );
+      } else if (item.atsiskaitymas === type) {
+        return sum + item.totalKaina;
+      } else {
+        return sum;
+      }
+    }, 0);
   };
 
   const exportToExcel = (data, startDate, endDate) => {
-    // Pertvarkyti duomenis, kad kiekviena prekė būtų atskira eilutė
     const formattedData = data.flatMap((item) =>
       item.prekes.map((preke) => ({
         Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
@@ -52,7 +61,9 @@ const BStatistika = () => {
         Prekė: preke.pavadinimas,
         "Serijos numeris": preke.serial,
         Kaina: preke.kaina,
-        Atsiskaitymas: item.atsiskaitymas,
+        Atsiskaitymas: Array.isArray(item.atsiskaitymas)
+          ? item.atsiskaitymas.map((a) => `${a.tipas} (${a.suma}€)`).join(", ")
+          : item.atsiskaitymas,
         Klientas: item.klientas.vardas,
         Sąskaita: item.saskaita,
         Kvitas: item.kvitas,
@@ -60,21 +71,15 @@ const BStatistika = () => {
       }))
     );
 
-    // Sukurti Excel darbalapį
     const worksheet = XLSX.utils.json_to_sheet(formattedData);
-
-    // Sukurti naują darbaknygę ir pridėti darbalapį
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Statistika");
-
-    // Generuoti Excel failą ir jį atsisiųsti
     const fileName = `statistika_${startDate}_iki_${endDate}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
   return (
     <>
-      {/* Bendros sumos pagal atsiskaitymo būdą */}
       <div className="grid grid-cols-5 ">
         <div className="flex text-center h-20 bg-yellow-500 text-white font-bold items-center justify-center">
           <span>Pavedimu: </span>
@@ -99,6 +104,7 @@ const BStatistika = () => {
           <span className="ml-1">{totalByPayment("COD").toFixed(2)}€</span>
         </div>
       </div>
+
       <div className="mb-4 mt-4">
         <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
           Pasirinkite laikotarpį:
@@ -127,6 +133,7 @@ const BStatistika = () => {
           Atsisiųsti Excel failą
         </button>
       </div>
+
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

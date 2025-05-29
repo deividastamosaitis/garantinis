@@ -7,6 +7,11 @@ export const getAllGarantinis = async (req, res) => {
     .populate("createdBy", "vardas email") // Pridėkite vartotojo informaciją
     .sort({ createdAt: -1 }); // Rūšiuoti pagal datą (naujausi viršuje)
 
+  console.log("🧾 DEBUG garantinis[0-2] atsiskaitymas:");
+  garantinis
+    .slice(0, 3)
+    .forEach((g, i) => console.log(`🔹 [${i}]`, g.atsiskaitymas));
+
   res.status(StatusCodes.OK).json({ garantinis });
   // const garantinis = await Garantinis.find({});
   // res.status(StatusCodes.OK).json({ garantinis });
@@ -24,6 +29,10 @@ export const getTodayGarantinis = async (req, res) => {
     })
       .populate("createdBy", "vardas email")
       .sort({ createdAt: -1 });
+    console.log("📅 getTodayGarantinis, atsiskaitymai:");
+    garantinis
+      .slice(0, 3)
+      .forEach((g, i) => console.log(`🔸 [${i}]`, g.atsiskaitymas));
     res.status(StatusCodes.OK).json({ garantinis });
   } catch (error) {
     res
@@ -96,35 +105,87 @@ export const getStatistics = async (req, res) => {
           totalRevenue: { $sum: "$totalKaina" },
           grynais: {
             $sum: {
-              $cond: [{ $eq: ["$atsiskaitymas", "grynais"] }, "$totalKaina", 0],
+              $sum: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$atsiskaitymas",
+                      as: "a",
+                      cond: { $eq: ["$$a.tipas", "grynais"] },
+                    },
+                  },
+                  as: "g",
+                  in: "$$g.suma",
+                },
+              },
             },
           },
           kortele: {
             $sum: {
-              $cond: [{ $eq: ["$atsiskaitymas", "kortele"] }, "$totalKaina", 0],
+              $sum: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$atsiskaitymas",
+                      as: "a",
+                      cond: { $eq: ["$$a.tipas", "kortele"] },
+                    },
+                  },
+                  as: "k",
+                  in: "$$k.suma",
+                },
+              },
             },
           },
           pavedimas: {
             $sum: {
-              $cond: [
-                { $eq: ["$atsiskaitymas", "pavedimas"] },
-                "$totalKaina",
-                0,
-              ],
+              $sum: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$atsiskaitymas",
+                      as: "a",
+                      cond: { $eq: ["$$a.tipas", "pavedimas"] },
+                    },
+                  },
+                  as: "p",
+                  in: "$$p.suma",
+                },
+              },
             },
           },
           lizingas: {
             $sum: {
-              $cond: [
-                { $eq: ["$atsiskaitymas", "lizingas"] },
-                "$totalKaina",
-                0,
-              ],
+              $sum: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$atsiskaitymas",
+                      as: "a",
+                      cond: { $eq: ["$$a.tipas", "lizingas"] },
+                    },
+                  },
+                  as: "l",
+                  in: "$$l.suma",
+                },
+              },
             },
           },
           cod: {
             $sum: {
-              $cond: [{ $eq: ["$atsiskaitymas", "COD"] }, "$totalKaina", 0],
+              $sum: {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$atsiskaitymas",
+                      as: "a",
+                      cond: { $eq: ["$$a.tipas", "COD"] },
+                    },
+                  },
+                  as: "c",
+                  in: "$$c.suma",
+                },
+              },
             },
           },
         },

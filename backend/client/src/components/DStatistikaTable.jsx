@@ -1,3 +1,5 @@
+// Atnaujintas DStatistikaTable.jsx komponentas, kuris palaiko tiek seną (string), tiek naują (array) atsiskaitymo formatą
+
 import { Link } from "react-router-dom";
 
 const DStatistikaTable = ({
@@ -16,6 +18,18 @@ const DStatistikaTable = ({
   const pakeistadate = new Date(originalDate);
   const isValidDate = !isNaN(date.getTime());
 
+  // Normalizuotas atsiskaitymas į string
+  let atsiskaitymasText = "—";
+  if (Array.isArray(atsiskaitymas)) {
+    atsiskaitymasText = atsiskaitymas
+      .map((a) => `${a.tipas} (${a.suma}€)`)
+      .join(", ");
+  } else if (typeof atsiskaitymas === "string") {
+    atsiskaitymasText = atsiskaitymas;
+  } else {
+    atsiskaitymasText = "Nenurodytas";
+  }
+
   return (
     <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
       <td className="px-6 py-4">
@@ -32,7 +46,7 @@ const DStatistikaTable = ({
       </td>
       <td className="px-6 py-4">{klientas.vardas}</td>
       <td className="px-6 py-4">{klientas.telefonas}</td>
-      <td className="px-6 py-4">{atsiskaitymas}</td>
+      <td className="px-6 py-4">{atsiskaitymasText}</td>
       <td className="px-6 py-4">{kKaina}€</td>
       <td className="px-6 py-4">
         <ul>
@@ -49,8 +63,7 @@ const DStatistikaTable = ({
       </td>
       <td className="px-6 py-4">{saskaita}</td>
       <td className="px-6 py-4">{kvitas}</td>
-      <td className="px-6 py-4">{createdBy.vardas}</td>{" "}
-      {/* Vartotojas, kuris sukūrė įrašą */}
+      <td className="px-6 py-4">{createdBy?.vardas || "—"}</td>
       <td className="px-6 py-4">
         <Link
           to={`../garantinis/${_id}`}
