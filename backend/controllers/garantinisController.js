@@ -7,7 +7,6 @@ export const getAllGarantinis = async (req, res) => {
     .populate("createdBy", "vardas email") // Pridėkite vartotojo informaciją
     .sort({ createdAt: -1 }); // Rūšiuoti pagal datą (naujausi viršuje)
 
-  console.log("🧾 DEBUG garantinis[0-2] atsiskaitymas:");
   garantinis
     .slice(0, 3)
     .forEach((g, i) => console.log(`🔹 [${i}]`, g.atsiskaitymas));
@@ -29,7 +28,7 @@ export const getTodayGarantinis = async (req, res) => {
     })
       .populate("createdBy", "vardas email")
       .sort({ createdAt: -1 });
-    console.log("📅 getTodayGarantinis, atsiskaitymai:");
+
     garantinis
       .slice(0, 3)
       .forEach((g, i) => console.log(`🔸 [${i}]`, g.atsiskaitymas));

@@ -20,33 +20,32 @@ export const loader = async ({ params }) => {
 };
 
 export const action = async ({ request, params }) => {
-  if (request.method === "DELETE") {
-    try {
-      await customFetch.delete(`/garantinis/${params.id}`);
-      toast.success("Garantinis sėkmingai ištrintas");
-      return redirect("/garantinis/d_statistika");
-    } catch (error) {
-      toast.error(error?.response?.data?.msg || "Klaida trinant garantinį");
-      return null;
-    }
+  const formData = await request.formData();
+
+  // Surinkti atsiskaitymo masyvą
+  const atsiskaitymas = [];
+  let atsIndex = 0;
+  while (true) {
+    const tipas = formData.get(`atsiskaitymas[${atsIndex}].tipas`);
+    const suma = formData.get(`atsiskaitymas[${atsIndex}].suma`);
+    if (!tipas && !suma) break;
+    atsiskaitymas.push({ tipas, suma: parseFloat(suma) || 0 });
+    atsIndex++;
   }
 
-  const formData = await request.formData();
   const updates = {
     klientas: {
       vardas: formData.get("klientas.vardas"),
       telefonas: formData.get("klientas.telefonas"),
       miestas: formData.get("klientas.miestas"),
     },
-    atsiskaitymas: formData.get("atsiskaitymas"),
+    atsiskaitymas,
     saskaita: formData.get("saskaita"),
     kvitas: formData.get("kvitas"),
     prekes: [],
     totalKaina: parseFloat(formData.get("totalKaina")) || 0,
     createdAt: new Date(formData.get("createdAt")),
   };
-
-  console.log("Prepared updates:", updates);
 
   let index = 0;
   while (true) {
@@ -88,6 +87,9 @@ const EditGarantinis = () => {
   const [newPrekesCount, setNewPrekesCount] = useState(0);
   const [totalKaina, setTotalKaina] = useState(garantinis.totalKaina || 0);
   const [prekesData, setPrekesData] = useState(garantinis.prekes);
+  const [atsiskaitymasData, setAtsiskaitymasData] = useState(
+    garantinis.atsiskaitymas || [{ tipas: "", suma: 0 }]
+  );
 
   // Calculate total price whenever prekesData changes
   useEffect(() => {
@@ -133,6 +135,22 @@ const EditGarantinis = () => {
   const totalPrekesCount =
     garantinis.prekes.length - deletedPrekes.length + newPrekesCount;
 
+  const handleAtsiskaitymasChange = (index, field, value) => {
+    const updated = [...atsiskaitymasData];
+    updated[index][field] = field === "suma" ? parseFloat(value) || 0 : value;
+    setAtsiskaitymasData(updated);
+  };
+
+  const pridetiAtsiskaityma = () => {
+    setAtsiskaitymasData([...atsiskaitymasData, { tipas: "", suma: 0 }]);
+  };
+
+  const salintiAtsiskaityma = (index) => {
+    const updated = [...atsiskaitymasData];
+    updated.splice(index, 1);
+    setAtsiskaitymasData(updated);
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Redaguoti garantinį</h2>
@@ -174,21 +192,67 @@ const EditGarantinis = () => {
 
         {/* Payment and invoice */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1">Atsiskaitymo būdas:</label>
-            <select
-              name="atsiskaitymas"
-              defaultValue={garantinis.atsiskaitymas}
-              className="w-full p-2 border rounded"
-              required
-            >
-              <option value="grynais">Grynais</option>
-              <option value="kortele">Kortele</option>
-              <option value="pavedimas">Pavedimas</option>
-              <option value="COD">C.O.D</option>
-              <option value="lizingas">Lizingas</option>
-            </select>
-          </div>
+          {atsiskaitymasData.map((ats, index) => (
+            <div key={index} className="flex gap-2 items-center">
+              <select
+                value={ats.tipas}
+                onChange={(e) =>
+                  handleAtsiskaitymasChange(index, "tipas", e.target.value)
+                }
+                className="p-2 border rounded"
+                required
+              >
+                <option value="">Pasirinkti</option>
+                <option value="grynais">Grynais</option>
+                <option value="kortele">Kortele</option>
+                <option value="pavedimas">Pavedimas</option>
+                <option value="COD">COD</option>
+                <option value="lizingas">Lizingas</option>
+              </select>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={ats.suma}
+                onChange={(e) =>
+                  handleAtsiskaitymasChange(index, "suma", e.target.value)
+                }
+                className="w-24 p-2 border rounded"
+                placeholder="€"
+                required
+              />
+              {atsiskaitymasData.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => salintiAtsiskaityma(index)}
+                  className="text-red-600 text-sm"
+                >
+                  Pašalinti
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={pridetiAtsiskaityma}
+            className="text-blue-600 text-sm"
+          >
+            + Pridėti atsiskaitymą
+          </button>
+          {atsiskaitymasData.map((ats, index) => (
+            <div key={`hidden-${index}`} className="hidden">
+              <input
+                type="hidden"
+                name={`atsiskaitymas[${index}].tipas`}
+                value={ats.tipas}
+              />
+              <input
+                type="hidden"
+                name={`atsiskaitymas[${index}].suma`}
+                value={ats.suma}
+              />
+            </div>
+          ))}
           <div>
             <label className="block mb-1">Sąskaitos numeris:</label>
             <input
