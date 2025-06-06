@@ -59,7 +59,7 @@ const BStatistikaTable = ({
       </td>
       <td className="px-6 py-4">{saskaita}</td>
       <td className="px-6 py-4">{kvitas}</td>
-      <td className="px-6 py-4">{createdBy.vardas}</td>
+      <td className="px-6 py-4">{createdBy?.vardas || "-"}</td>
       <td className="px-6 py-4">
         <Link
           to={`../garantinis/${_id}`}
