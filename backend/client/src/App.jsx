@@ -21,6 +21,7 @@ import KStatistika from "./pages/garantiniai/KStatistika";
 import EditGarantinis from "./pages/garantiniai/EditGarantinis";
 import Alkotesteriai from "./pages/Alkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
+import AiBOT from "./pages/AiBOT";
 
 //RMA importai
 import RMAList from "./pages/rma/RMAList";
@@ -143,6 +144,10 @@ const router = createBrowserRouter([
                 action: deleteAlkotesterisAction,
               },
             ],
+          },
+          {
+            path: "aibotas",
+            element: <AiBOT />,
           },
           {
             path: "rma",
