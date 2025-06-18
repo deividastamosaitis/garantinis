@@ -41,8 +41,8 @@ const BStatistikaTable = ({
             })
           : "Nėra datos"}
       </td>
-      <td className="px-6 py-4">{klientas.vardas}</td>
-      <td className="px-6 py-4">{klientas.telefonas}</td>
+      <td className="px-6 py-4">{klientas?.vardas || "Nežinomas"}</td>
+      <td className="px-6 py-4">{klientas?.telefonas || "-"}</td>
       <td className="px-6 py-4">{atsiskaitymasText}</td>
       <td className="px-6 py-4">{kKaina}€</td>
       <td className="px-6 py-4">

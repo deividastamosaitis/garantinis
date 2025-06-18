@@ -7,9 +7,8 @@ export const getAllGarantinis = async (req, res) => {
     .populate("createdBy", "vardas email") // Pridėkite vartotojo informaciją
     .sort({ createdAt: -1 }); // Rūšiuoti pagal datą (naujausi viršuje)
 
-  garantinis
-    .slice(0, 3)
-    .forEach((g, i) => console.log(`🔹 [${i}]`, g.atsiskaitymas));
+  garantinis.slice(0, 3);
+  // .forEach((g, i) => console.log(`🔹 [${i}]`, g.atsiskaitymas));
 
   res.status(StatusCodes.OK).json({ garantinis });
   // const garantinis = await Garantinis.find({});
@@ -29,9 +28,8 @@ export const getTodayGarantinis = async (req, res) => {
       .populate("createdBy", "vardas email")
       .sort({ createdAt: -1 });
 
-    garantinis
-      .slice(0, 3)
-      .forEach((g, i) => console.log(`🔸 [${i}]`, g.atsiskaitymas));
+    garantinis.slice(0, 3);
+    // .forEach((g, i) => console.log(`🔸 [${i}]`, g.atsiskaitymas));
     res.status(StatusCodes.OK).json({ garantinis });
   } catch (error) {
     res

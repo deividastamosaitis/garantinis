@@ -54,26 +54,75 @@ const BStatistika = () => {
   };
 
   const exportToExcel = (data, startDate, endDate) => {
-    const formattedData = data.flatMap((item) =>
-      item.prekes.map((preke) => ({
-        Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
-        Barkodas: preke.barkodas,
-        Prekė: preke.pavadinimas,
-        "Serijos numeris": preke.serial,
-        Kaina: preke.kaina,
-        Atsiskaitymas: Array.isArray(item.atsiskaitymas)
-          ? item.atsiskaitymas.map((a) => `${a.tipas} (${a.suma}€)`).join(", ")
-          : item.atsiskaitymas,
-        Klientas: item.klientas.vardas,
-        Sąskaita: item.saskaita,
-        Kvitas: item.kvitas,
-        Sukūrė: item.createdBy.vardas,
-      }))
-    );
+    if (!data || data.length === 0) return;
 
-    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const paymentTypes = ["pavedimas", "kortele", "grynais", "lizingas", "COD"];
+    const grouped = {};
+    const totals = {};
+
+    paymentTypes.forEach((tipas) => {
+      grouped[tipas] = [];
+      totals[tipas] = 0;
+    });
+
+    data.forEach((item) => {
+      const ats = Array.isArray(item.atsiskaitymas)
+        ? item.atsiskaitymas.map((a) => a.tipas.toLowerCase()).join(",")
+        : (item.atsiskaitymas || "").toLowerCase();
+
+      const targetTipas = paymentTypes.find((tipas) => ats.includes(tipas));
+      const destination = targetTipas || "kita";
+
+      item.prekes.forEach((preke) => {
+        const row = {
+          Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
+          Barkodas: preke?.barkodas?.toString() || "–",
+          Prekė: preke?.pavadinimas || "–",
+          Kaina: preke?.kaina || 0,
+          Atsiskaitymas: Array.isArray(item.atsiskaitymas)
+            ? item.atsiskaitymas
+                .map((a) => `${a.tipas} (${a.suma}€)`)
+                .join(", ")
+            : item.atsiskaitymas || "–",
+          Sąskaita: item.saskaita || "–",
+          Kvitas: item.kvitas || "–",
+        };
+
+        grouped[destination] = grouped[destination] || [];
+        grouped[destination].push(row);
+
+        if (destination in totals) {
+          totals[destination] += preke?.kaina || 0;
+        }
+      });
+    });
+
+    // Galutinis masyvas su grupėmis, sumomis ir tarpais
+    const finalData = [];
+    const boldRowIndexes = [];
+
+    paymentTypes.forEach((tipas) => {
+      const rows = grouped[tipas];
+      if (rows && rows.length > 0) {
+        finalData.push(...rows);
+        finalData.push({}); // tuščia eilutė
+        const sumRow = {
+          Prekė: `Bendra suma: ${tipas}`,
+          Kaina: totals[tipas].toFixed(2),
+        };
+        finalData.push(sumRow);
+        boldRowIndexes.push(finalData.length - 1);
+        finalData.push({}); // papildoma tuščia po sumos
+      }
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(finalData, {
+      skipHeader: false,
+    });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Statistika");
+
+    // Įrašom failą
     const fileName = `statistika_${startDate}_iki_${endDate}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
