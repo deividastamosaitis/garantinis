@@ -13,6 +13,8 @@ const DStatistikaTable = ({
   createdBy,
   createdAt,
   originalDate,
+  showPayments,
+  showEdit,
 }) => {
   const date = new Date(createdAt);
   const pakeistadate = new Date(originalDate);
@@ -46,8 +48,8 @@ const DStatistikaTable = ({
       </td>
       <td className="px-6 py-4">{klientas.vardas}</td>
       <td className="px-6 py-4">{klientas.telefonas}</td>
-      <td className="px-6 py-4">{atsiskaitymasText}</td>
-      <td className="px-6 py-4">{kKaina}€</td>
+      {showPayments && <td className="px-6 py-4">{atsiskaitymasText}</td>}
+      {showPayments && <td className="px-6 py-4">{kKaina}€</td>}
       <td className="px-6 py-4">
         <ul>
           {krepselis.map((preke, index) => (
@@ -64,14 +66,16 @@ const DStatistikaTable = ({
       <td className="px-6 py-4">{saskaita}</td>
       <td className="px-6 py-4">{kvitas}</td>
       <td className="px-6 py-4">{createdBy?.vardas || "—"}</td>
-      <td className="px-6 py-4">
-        <Link
-          to={`../garantinis/${_id}`}
-          className="text-blue-500 hover:underline"
-        >
-          Redaguoti
-        </Link>
-      </td>
+      {showEdit && (
+        <td className="px-6 py-4">
+          <Link
+            to={`../garantinis/${_id}`}
+            className="text-blue-500 hover:underline"
+          >
+            Redaguoti
+          </Link>
+        </td>
+      )}
     </tr>
   );
 };

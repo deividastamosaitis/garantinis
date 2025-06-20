@@ -6,16 +6,25 @@ import { toast } from "react-toastify";
 
 export const loader = async () => {
   try {
-    const { data } = await customFetch.get("/garantinis");
-    return { data };
+    const [userResponse, garantinisResponse] = await Promise.all([
+      customFetch.get("/users/current-user"),
+      customFetch.get("/garantinis"),
+    ]);
+
+    return {
+      user: userResponse.data,
+      data: garantinisResponse.data,
+    };
   } catch (error) {
-    toast.error(error?.response?.data?.msg);
+    toast.error(error?.response?.data?.msg || "Klaida kraunant duomenis");
     return error;
   }
 };
 
 const Klientai = () => {
-  const { data } = useLoaderData();
+  const { user, data } = useLoaderData();
+  const garantinis = data.garantinis;
+  const isAdmin = user?.user?.role === "admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
@@ -118,13 +127,15 @@ const Klientai = () => {
                             Pirkimo data: {date}
                           </p>
                         </div>
-                        <button
-                          className="flex items-center gap-1 text-sm text-blue-700 border border-blue-400 px-2 py-1 rounded hover:bg-blue-100 transition"
-                          onClick={() => handleEdit(garantinisId)}
-                        >
-                          <Pencil size={14} />
-                          Redaguoti
-                        </button>
+                        {isAdmin && (
+                          <button
+                            className="flex items-center gap-1 text-sm text-blue-700 border border-blue-400 px-2 py-1 rounded hover:bg-blue-100 transition"
+                            onClick={() => handleEdit(garantinisId)}
+                          >
+                            <Pencil size={14} />
+                            Redaguoti
+                          </button>
+                        )}
                       </div>
 
                       {/* Prekių lentelė */}
@@ -177,7 +188,6 @@ const Klientai = () => {
       ) : (
         <div>
           <h2 className="text-xl font-semibold mb-4">Rezultatai</h2>
-          {/* Čia gali rodyti šiandienos garantinius, jei nori */}
         </div>
       )}
     </div>

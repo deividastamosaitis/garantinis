@@ -119,7 +119,7 @@ const Layout = () => {
                 </span>
               </Link>
             </li>
-            {user.user.role === "admin" && (
+            {["admin", "vadyba"].includes(user.user.role) && (
               <li>
                 <button
                   type="button"

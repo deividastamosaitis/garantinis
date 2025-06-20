@@ -7,6 +7,17 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 06 23",
+      type: "Atnaujinimas",
+      title: "Garantinių redagavimas",
+      description: "RAMUTĖ DIEVAS",
+      highlights: [
+        "Nuo šiol galima redaguoti garantinius TIK RAMUTEI IR RIČARDUI, niekam kitam.",
+        "Redaguoti mygtuku mato tik Ramutė su Ričardu",
+      ],
+    },
+    {
+      id: 1,
       date: "2025 05 21",
       type: "Atnaujinimas",
       title: "Garantinių pildymas",

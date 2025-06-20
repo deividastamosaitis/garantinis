@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useLoaderData, redirect } from "react-router-dom";
+
 import customFetch from "../../utils/customFetch.js";
+
 import DStatistikaTable from "../../components/DStatistikaTable";
 
 export const loader = async () => {
   try {
-    const { data } = await customFetch.get("/garantinis/today");
-    return { data };
+    const [userResponse, garantinisResponse] = await Promise.all([
+      customFetch.get("/users/current-user"),
+      customFetch.get("/garantinis/today"),
+    ]);
+
+    return {
+      user: userResponse.data,
+      data: garantinisResponse.data,
+    };
   } catch (error) {
-    toast.error(error?.response?.data?.msg);
+    toast.error(error?.response?.data?.msg || "Klaida kraunant duomenis");
     return error;
   }
 };
@@ -17,8 +26,11 @@ const DStatistika = () => {
   const [filter, setFilter] = useState("all");
   const data = useLoaderData(); // Gauti duomenis iš loader funkcijos
   const garantinis = data.data.garantinis;
+  const [role, setRole] = useState(null);
+  const user = data.user?.user;
+  const isAdmin = user?.role === "admin";
+  const isPrivilegedUser = ["admin", "vadyba"].includes(user?.role);
 
-  // Filtruoti duomenis pagal atsiskaitymo būdą
   const filteredData =
     filter === "all"
       ? garantinis
@@ -76,13 +88,13 @@ const DStatistika = () => {
               <th className="px-6 py-3">Data</th>
               <th className="px-6 py-3">Klientas</th>
               <th className="px-6 py-3">Telefonas</th>
-              <th className="px-6 py-3">Atsiskaitymas</th>
-              <th className="px-6 py-3">Kaina</th>
+              {isPrivilegedUser && <th className="px-6 py-3">Atsiskaitymas</th>}
+              {isPrivilegedUser && <th className="px-6 py-3">Kaina</th>}
               <th className="px-6 py-3">Prekės</th>
               <th className="px-6 py-3">Sąskaita</th>
               <th className="px-6 py-3">Kvitas</th>
               <th className="px-6 py-3">Sukūrė</th>
-              <th className="px-6 py-3">Veiksmas</th>
+              {isAdmin && <th className="px-6 py-3">Veiksmas</th>}
             </tr>
           </thead>
           <tbody>
@@ -110,6 +122,8 @@ const DStatistika = () => {
                 createdBy={pirkejas.createdBy}
                 createdAt={pirkejas.createdAt}
                 originalDate={pirkejas.originalDate}
+                showPayments={isPrivilegedUser}
+                showEdit={isAdmin}
               />
             ))}
           </tbody>
