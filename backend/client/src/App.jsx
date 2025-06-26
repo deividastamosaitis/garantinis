@@ -23,6 +23,19 @@ import Alkotesteriai from "./pages/Alkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
 import AiBOT from "./pages/AiBOT";
 
+//SERVISAS
+import Servisas, { loader as servisasLoader } from "./pages/servisas/Servisas";
+import ServisasPildyti, {
+  action as pildytiAction,
+} from "./pages/servisas/Pildyti";
+import ServisasRedaguoti, {
+  loader as redaguotiLoader,
+  action as redaguotiAction,
+} from "./pages/servisas/Redaguoti";
+import ServisasPerziureti, {
+  loader as perziuretiLoader,
+} from "./pages/servisas/Perziureti";
+
 //RMA importai
 import RMAList from "./pages/rma/RMAList";
 import RMADetails from "./pages/rma/RMADetails";
@@ -148,6 +161,32 @@ const router = createBrowserRouter([
           {
             path: "aibotas",
             element: <AiBOT />,
+          },
+          {
+            path: "servisas",
+            children: [
+              {
+                index: true,
+                element: <Servisas />,
+                loader: servisasLoader,
+              },
+              {
+                path: "pildyti",
+                element: <ServisasPildyti />,
+                action: pildytiAction,
+              },
+              {
+                path: "redaguoti/:id",
+                element: <ServisasRedaguoti />,
+                loader: redaguotiLoader,
+                action: redaguotiAction,
+              },
+              {
+                path: ":id",
+                element: <ServisasPerziureti />,
+                loader: perziuretiLoader,
+              },
+            ],
           },
           {
             path: "rma",

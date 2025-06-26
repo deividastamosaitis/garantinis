@@ -14,6 +14,7 @@ import KlientasRouter from "./routes/klientasRouter.js";
 import GarantinisRouter from "./routes/garantinisRouter.js";
 import AlkotesterisRouter from "./routes/alkotesteriaiRouter.js";
 import RMARouter from "./routes/rmaRouter.js";
+import serviceTicketRoutes from "./routes/serviceTicketRoutes.js";
 
 //middleware
 import errorHandlerMiddleware from "./middlewares/errorHandlerMiddleware.js";
@@ -43,6 +44,7 @@ app.use("/api/garantinis", authenticateUser, GarantinisRouter);
 app.use("/api/alkotesteriai", authenticateUser, AlkotesterisRouter);
 app.use("/api/rma", authenticateUser, RMARouter);
 app.use("/api/auth", authRouter);
+app.use("/api/tickets", authenticateUser, serviceTicketRoutes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "./public", "index.html"));
