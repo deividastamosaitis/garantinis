@@ -56,7 +56,7 @@ const BStatistika = () => {
   const exportToExcel = (data, startDate, endDate) => {
     if (!data || data.length === 0) return;
 
-    const paymentTypes = ["kortele", "grynais"]; // Rodysime tik šiuos
+    const paymentTypes = ["grynais", "kortele"];
     const groupedByDate = {};
     const totalOverall = {};
 
@@ -64,23 +64,20 @@ const BStatistika = () => {
       totalOverall[tipas] = 0;
     });
 
-    // Grupavimas pagal datą
     data.forEach((item) => {
-      // Filtruojam, ar yra bent vienas norimas atsiskaitymo tipas
       const ats = Array.isArray(item.atsiskaitymas)
         ? item.atsiskaitymas.map((a) => a.tipas.toLowerCase())
         : [item.atsiskaitymas?.toLowerCase()];
 
       const hasWantedType = ats.some((tipas) => paymentTypes.includes(tipas));
-      if (!hasWantedType) return; // praleidžiam
+      if (!hasWantedType) return;
 
       const date = new Date(item.createdAt).toISOString().split("T")[0];
       if (!groupedByDate[date]) groupedByDate[date] = [];
       groupedByDate[date].push(item);
     });
 
-    // Surūšiuojam datas kylančia tvarka
-    const sortedDates = Object.keys(groupedByDate).sort(); // ascending
+    const sortedDates = Object.keys(groupedByDate).sort();
 
     const finalData = [];
 
@@ -88,58 +85,66 @@ const BStatistika = () => {
       const items = groupedByDate[date];
       finalData.push({ Data: `DATA: ${date}` });
 
-      const dailyTotals = {};
-      paymentTypes.forEach((tipas) => (dailyTotals[tipas] = 0));
+      paymentTypes.forEach((targetType) => {
+        let typeTotal = 0;
 
-      items.forEach((item) => {
-        const atsiskaitymasStr = Array.isArray(item.atsiskaitymas)
-          ? item.atsiskaitymas
-              .filter((a) => paymentTypes.includes(a.tipas.toLowerCase()))
-              .map((a) => `${a.tipas} (${a.suma}€)`)
-              .join(", ")
-          : paymentTypes.includes(item.atsiskaitymas?.toLowerCase())
-          ? item.atsiskaitymas
-          : "–";
-
-        item.prekes.forEach((preke) => {
-          finalData.push({
-            Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
-            Barkodas: preke?.barkodas?.toString() || "–",
-            Prekė: preke?.pavadinimas || "–",
-            Kaina: preke?.kaina || 0,
-            Atsiskaitymas: atsiskaitymasStr,
-            Sąskaita: item.saskaita || "–",
-            Kvitas: item.kvitas || "–",
-          });
+        const filteredItems = items.filter((item) => {
+          const ats = Array.isArray(item.atsiskaitymas)
+            ? item.atsiskaitymas.map((a) => a.tipas.toLowerCase())
+            : [item.atsiskaitymas?.toLowerCase()];
+          return ats.includes(targetType);
         });
 
-        // Sumuojam tik norimus atsiskaitymo tipus
-        if (Array.isArray(item.atsiskaitymas)) {
-          item.atsiskaitymas.forEach((a) => {
-            const tipas = a.tipas.toLowerCase();
-            if (paymentTypes.includes(tipas)) {
-              dailyTotals[tipas] += a.suma;
-              totalOverall[tipas] += a.suma;
+        filteredItems.forEach((item) => {
+          const atsiskaitymasStr = Array.isArray(item.atsiskaitymas)
+            ? item.atsiskaitymas
+                .filter((a) => a.tipas.toLowerCase() === targetType)
+                .map((a) => `${a.tipas} (${a.suma}€)`)
+                .join(", ")
+            : item.atsiskaitymas?.toLowerCase() === targetType
+            ? item.atsiskaitymas
+            : "–";
+
+          item.prekes.forEach((preke) => {
+            finalData.push({
+              Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
+              Barkodas: preke?.barkodas?.toString() || "–",
+              Prekė: preke?.pavadinimas || "–",
+              Kaina: preke?.kaina || 0,
+              Atsiskaitymas: atsiskaitymasStr,
+              Sąskaita: item.saskaita || "–",
+              Kvitas: item.kvitas || "–",
+            });
+          });
+
+          // Sumavimas
+          if (Array.isArray(item.atsiskaitymas)) {
+            item.atsiskaitymas.forEach((a) => {
+              const tipas = a.tipas.toLowerCase();
+              if (tipas === targetType) {
+                typeTotal += a.suma;
+                totalOverall[tipas] += a.suma;
+              }
+            });
+          } else if (typeof item.atsiskaitymas === "string") {
+            const tipas = item.atsiskaitymas.toLowerCase();
+            if (tipas === targetType) {
+              typeTotal += item.totalKaina;
+              totalOverall[tipas] += item.totalKaina;
             }
-          });
-        } else if (typeof item.atsiskaitymas === "string") {
-          const tipas = item.atsiskaitymas.toLowerCase();
-          if (paymentTypes.includes(tipas)) {
-            dailyTotals[tipas] += item.totalKaina;
-            totalOverall[tipas] += item.totalKaina;
           }
-        }
-      });
-
-      finalData.push({});
-      paymentTypes.forEach((tipas) => {
-        finalData.push({
-          Prekė: `Dienos suma: ${tipas}`,
-          Kaina: dailyTotals[tipas].toFixed(2),
         });
+
+        // Iškart po šio tipo įrašų – sumos eilutė
+        finalData.push({
+          Prekė: `Dienos suma (${targetType})`,
+          Kaina: typeTotal.toFixed(2),
+        });
+
+        finalData.push({}); // tarpas tarp tipų
       });
 
-      finalData.push({});
+      finalData.push({}); // tarpas tarp dienų
     });
 
     // Bendra suma visam laikotarpiui
