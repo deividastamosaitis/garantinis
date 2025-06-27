@@ -56,73 +56,105 @@ const BStatistika = () => {
   const exportToExcel = (data, startDate, endDate) => {
     if (!data || data.length === 0) return;
 
-    const paymentTypes = ["pavedimas", "kortele", "grynais", "lizingas", "COD"];
-    const grouped = {};
-    const totals = {};
+    const paymentTypes = ["kortele", "grynais"]; // Rodysime tik šiuos
+    const groupedByDate = {};
+    const totalOverall = {};
 
     paymentTypes.forEach((tipas) => {
-      grouped[tipas] = [];
-      totals[tipas] = 0;
+      totalOverall[tipas] = 0;
     });
 
+    // Grupavimas pagal datą
     data.forEach((item) => {
+      // Filtruojam, ar yra bent vienas norimas atsiskaitymo tipas
       const ats = Array.isArray(item.atsiskaitymas)
-        ? item.atsiskaitymas.map((a) => a.tipas.toLowerCase()).join(",")
-        : (item.atsiskaitymas || "").toLowerCase();
+        ? item.atsiskaitymas.map((a) => a.tipas.toLowerCase())
+        : [item.atsiskaitymas?.toLowerCase()];
 
-      const targetTipas = paymentTypes.find((tipas) => ats.includes(tipas));
-      const destination = targetTipas || "kita";
+      const hasWantedType = ats.some((tipas) => paymentTypes.includes(tipas));
+      if (!hasWantedType) return; // praleidžiam
 
-      item.prekes.forEach((preke) => {
-        const row = {
-          Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
-          Barkodas: preke?.barkodas?.toString() || "–",
-          Prekė: preke?.pavadinimas || "–",
-          Kaina: preke?.kaina || 0,
-          Atsiskaitymas: Array.isArray(item.atsiskaitymas)
-            ? item.atsiskaitymas
-                .map((a) => `${a.tipas} (${a.suma}€)`)
-                .join(", ")
-            : item.atsiskaitymas || "–",
-          Sąskaita: item.saskaita || "–",
-          Kvitas: item.kvitas || "–",
-        };
+      const date = new Date(item.createdAt).toISOString().split("T")[0];
+      if (!groupedByDate[date]) groupedByDate[date] = [];
+      groupedByDate[date].push(item);
+    });
 
-        grouped[destination] = grouped[destination] || [];
-        grouped[destination].push(row);
+    // Surūšiuojam datas kylančia tvarka
+    const sortedDates = Object.keys(groupedByDate).sort(); // ascending
 
-        if (destination in totals) {
-          totals[destination] += preke?.kaina || 0;
+    const finalData = [];
+
+    sortedDates.forEach((date) => {
+      const items = groupedByDate[date];
+      finalData.push({ Data: `DATA: ${date}` });
+
+      const dailyTotals = {};
+      paymentTypes.forEach((tipas) => (dailyTotals[tipas] = 0));
+
+      items.forEach((item) => {
+        const atsiskaitymasStr = Array.isArray(item.atsiskaitymas)
+          ? item.atsiskaitymas
+              .filter((a) => paymentTypes.includes(a.tipas.toLowerCase()))
+              .map((a) => `${a.tipas} (${a.suma}€)`)
+              .join(", ")
+          : paymentTypes.includes(item.atsiskaitymas?.toLowerCase())
+          ? item.atsiskaitymas
+          : "–";
+
+        item.prekes.forEach((preke) => {
+          finalData.push({
+            Data: new Date(item.createdAt).toLocaleDateString("lt-LT"),
+            Barkodas: preke?.barkodas?.toString() || "–",
+            Prekė: preke?.pavadinimas || "–",
+            Kaina: preke?.kaina || 0,
+            Atsiskaitymas: atsiskaitymasStr,
+            Sąskaita: item.saskaita || "–",
+            Kvitas: item.kvitas || "–",
+          });
+        });
+
+        // Sumuojam tik norimus atsiskaitymo tipus
+        if (Array.isArray(item.atsiskaitymas)) {
+          item.atsiskaitymas.forEach((a) => {
+            const tipas = a.tipas.toLowerCase();
+            if (paymentTypes.includes(tipas)) {
+              dailyTotals[tipas] += a.suma;
+              totalOverall[tipas] += a.suma;
+            }
+          });
+        } else if (typeof item.atsiskaitymas === "string") {
+          const tipas = item.atsiskaitymas.toLowerCase();
+          if (paymentTypes.includes(tipas)) {
+            dailyTotals[tipas] += item.totalKaina;
+            totalOverall[tipas] += item.totalKaina;
+          }
         }
+      });
+
+      finalData.push({});
+      paymentTypes.forEach((tipas) => {
+        finalData.push({
+          Prekė: `Dienos suma: ${tipas}`,
+          Kaina: dailyTotals[tipas].toFixed(2),
+        });
+      });
+
+      finalData.push({});
+    });
+
+    // Bendra suma visam laikotarpiui
+    finalData.push({ Data: "BENDRA SUMA VISAM LAIKOTARPIUI" });
+    paymentTypes.forEach((tipas) => {
+      finalData.push({
+        Prekė: `Bendra suma: ${tipas}`,
+        Kaina: totalOverall[tipas].toFixed(2),
       });
     });
 
-    // Galutinis masyvas su grupėmis, sumomis ir tarpais
-    const finalData = [];
-    const boldRowIndexes = [];
-
-    paymentTypes.forEach((tipas) => {
-      const rows = grouped[tipas];
-      if (rows && rows.length > 0) {
-        finalData.push(...rows);
-        finalData.push({}); // tuščia eilutė
-        const sumRow = {
-          Prekė: `Bendra suma: ${tipas}`,
-          Kaina: totals[tipas].toFixed(2),
-        };
-        finalData.push(sumRow);
-        boldRowIndexes.push(finalData.length - 1);
-        finalData.push({}); // papildoma tuščia po sumos
-      }
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(finalData, {
-      skipHeader: false,
-    });
+    const worksheet = XLSX.utils.json_to_sheet(finalData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Statistika");
 
-    // Įrašom failą
     const fileName = `statistika_${startDate}_iki_${endDate}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
