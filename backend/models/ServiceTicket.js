@@ -5,10 +5,11 @@ const ExternalServiceSchema = new mongoose.Schema(
     sentTo: String, // Pvz. "eproma.lt"
     sentDate: Date, // Kada išsiųsta
     rmaCode: String, // Pvz. "RMA123456"
+    supplierRmaCode: String,
     status: {
       type: String,
-      enum: ["Išsiųsta", "Grąžinta", "Atsisakyta", "Nežinoma"],
-      default: "Išsiųsta",
+      enum: ["Išsiųsta", "Laukiama", "Kreditas", "Grąžinta", "Registruota"],
+      default: "Registruota",
     },
     returnDate: Date, // Kada grąžinta (nebūtina)
   },

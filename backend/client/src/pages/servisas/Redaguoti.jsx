@@ -8,17 +8,25 @@ export async function loader({ params }) {
   return data;
 }
 
-// 💾 Action
+// Action
 export async function action({ request, params }) {
   const formData = await request.formData();
   const raw = Object.fromEntries(formData);
 
   const updates = {};
+
   for (const [key, value] of Object.entries(raw)) {
-    const [group, field] = key.split(".");
-    if (field) {
-      if (!updates[group]) updates[group] = {};
-      updates[group][field] = value;
+    const parts = key.split(".");
+
+    if (parts.length === 3) {
+      const [a, b, c] = parts;
+      updates[a] ??= {};
+      updates[a][b] ??= {};
+      updates[a][b][c] = value;
+    } else if (parts.length === 2) {
+      const [a, b] = parts;
+      updates[a] ??= {};
+      updates[a][b] = value;
     } else {
       updates[key] = value;
     }
@@ -27,8 +35,9 @@ export async function action({ request, params }) {
   try {
     await customFetch.patch(`/tickets/${params.id}`, updates);
     toast.success("Remontas atnaujintas");
-    return redirect("/garantinis/servisas");
+    return redirect(`/garantinis/servisas/${params.id}`);
   } catch (err) {
+    console.error("PATCH klaida:", err.response?.data || err.message);
     toast.error("Klaida atnaujinant");
     return null;
   }
@@ -155,6 +164,54 @@ export default function Redaguoti() {
             placeholder="Pastabos apie remontą"
           />
         </div>
+        {/* Issorinis servisas */}
+        <fieldset className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <legend className="font-semibold col-span-full">
+            Išorinis servisas
+          </legend>
+
+          <input
+            name="product.externalService.sentTo"
+            defaultValue={ticket.product?.externalService?.sentTo}
+            placeholder="Tiekėjas (pvz. EPROMA)"
+            className="input"
+          />
+          <input
+            name="product.externalService.sentDate"
+            defaultValue={ticket.product?.externalService?.sentDate?.slice(
+              0,
+              10
+            )}
+            type="date"
+            className="input"
+          />
+          <input
+            name="product.externalService.rmaCode"
+            defaultValue={ticket.product?.externalService?.rmaCode}
+            placeholder="RMA (klientui)"
+            className="input"
+            disabled
+          />
+          <input
+            name="product.externalService.supplierRmaCode"
+            defaultValue={ticket.product?.externalService?.supplierRmaCode}
+            placeholder="Tiekėjo RMA kodas"
+            className="input"
+          />
+          <select
+            name="product.externalService.status"
+            defaultValue={ticket.product?.externalService?.status || "Nežinoma"}
+            className="input"
+          >
+            <option default value="Registruota">
+              Registruota
+            </option>
+            <option value="Laukiama">Laukiama</option>
+            <option value="Išsiųsta">Išsiųsta</option>
+            <option value="Grąžinta">Grąžinta</option>
+            <option value="Kreditas">Kreditas</option>
+          </select>
+        </fieldset>
 
         <button type="submit" className="btn">
           Išsaugoti pakeitimus

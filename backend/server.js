@@ -1,11 +1,12 @@
-import "express-async-errors";
 import * as dotenv from "dotenv";
 dotenv.config();
+import "express-async-errors";
 import express from "express";
 import mongoose from "mongoose";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-
+import cors from "cors";
+import { sendEmail } from "./utils/sendEmail.js";
 //routers
 import PrekeRouter from "./routes/prekeRouter.js";
 import { authRouter } from "./routes/authRouter.js";
@@ -26,6 +27,13 @@ import { fileURLToPath } from "url";
 import path from "path";
 
 const app = express();
+app.use(
+  cors({
+    origin: "*", // arba konkretus domenas jei hostinsi išorėje
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -44,7 +52,21 @@ app.use("/api/garantinis", authenticateUser, GarantinisRouter);
 app.use("/api/alkotesteriai", authenticateUser, AlkotesterisRouter);
 app.use("/api/rma", authenticateUser, RMARouter);
 app.use("/api/auth", authRouter);
-app.use("/api/tickets", authenticateUser, serviceTicketRoutes);
+app.use("/api/tickets", serviceTicketRoutes);
+
+app.get("/test-email", async (req, res) => {
+  try {
+    await sendEmail({
+      to: "tavopastas@example.com",
+      subject: "Testas iš GPSmeistras",
+      text: "Sveiki! Laiško siuntimas veikia.",
+    });
+    res.send("✅ Laiškas išsiųstas!");
+  } catch (err) {
+    console.error("❌ SMTP klaida:", err.message);
+    res.status(500).send("SMTP klaida: " + err.message);
+  }
+});
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "./public", "index.html"));

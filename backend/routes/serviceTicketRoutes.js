@@ -15,14 +15,16 @@ import { authenticateUser } from "../middlewares/authMiddleware.js";
 // Viešas: peržiūrėti visus
 router
   .route("/")
-  .get(getAllServiceTickets)
+  .get(authenticateUser, getAllServiceTickets)
   .post(authenticateUser, createServiceTicket);
 
 router
   .route("/:id")
-  .get(getServiceTicket)
+  .get(authenticateUser, getServiceTicket)
   .patch(authenticateUser, updateServiceTicket)
   .delete(authenticateUser, deleteServiceTicket);
+
+router.post("/public", createServiceTicket);
 
 router.patch("/:id/external", authenticateUser, updateExternalServiceInfo);
 
