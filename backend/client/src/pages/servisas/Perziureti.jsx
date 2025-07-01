@@ -71,43 +71,37 @@ export default function Perziureti() {
         </div>
 
         {/* Video ar FOTO */}
-        {ticket.attachments?.length > 0 && (
-          <div className="bg-white shadow rounded p-4 border col-span-full">
-            <h2 className="font-semibold text-lg mb-2">📎 Prisegti failai</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ticket.attachments.map((name) => {
-                const url = `http://localhost:5001/uploads/${name}`;
-                const isImage = name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                const isVideo = name.match(/\.(mp4|webm|mov|avi)$/i);
+        {ticket.attachments.map((name) => {
+          const fileServer = import.meta.env.VITE_FILE_SERVER_URL;
+          const url = `${fileServer}/uploads/${name}`;
+          const isImage = name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+          const isVideo = name.match(/\.(mp4|webm|mov|avi)$/i);
 
-                return (
-                  <div key={name} className="border p-2 rounded bg-gray-50">
-                    {isImage && (
-                      <img
-                        src={url}
-                        alt={name}
-                        className="max-w-full h-auto rounded"
-                      />
-                    )}
-                    {isVideo && (
-                      <video src={url} controls className="w-full rounded" />
-                    )}
-                    {!isImage && !isVideo && (
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        Atsisiųsti: {name}
-                      </a>
-                    )}
-                  </div>
-                );
-              })}
+          return (
+            <div key={name} className="border p-2 rounded bg-gray-50">
+              {isImage && (
+                <img
+                  src={url}
+                  alt={name}
+                  className="max-w-full h-auto rounded"
+                />
+              )}
+              {isVideo && (
+                <video src={url} controls className="w-full rounded" />
+              )}
+              {!isImage && !isVideo && (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  Atsisiųsti: {name}
+                </a>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })}
 
         {/* Statusas */}
         <div className="bg-white shadow rounded p-4 border">

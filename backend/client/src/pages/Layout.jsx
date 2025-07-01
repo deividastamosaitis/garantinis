@@ -194,22 +194,23 @@ const Layout = () => {
                 <span class="flex-1 ms-3 whitespace-nowrap">Klientai</span>
               </Link>
             </li>
+
             <li>
               <Link
-                to="/garantinis/prekes"
+                to="/garantinis/servisas"
                 class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
-                <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-tag"></i>
+                <i class="flex-shrink-0 w-5 h-5 text-red-500 transition duration-75 dark:text-red-400 group-hover:text-red-900 dark:group-hover:text-white fa-solid fa-screwdriver-wrench"></i>
 
                 <span class="flex-1 ms-3 whitespace-nowrap">
-                  Prekės (BARCODE)
+                  Servisas (NAUJAS)
                 </span>
               </Link>
             </li>
             <li>
               <Link
                 to="/garantinis/rma"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 opacity-50 group"
               >
                 <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-screwdriver-wrench"></i>
 
@@ -224,6 +225,18 @@ const Layout = () => {
                 <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-wine-bottle"></i>
 
                 <span class="flex-1 ms-3 whitespace-nowrap">Alkotesteriai</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/garantinis/prekes"
+                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <i class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white fa-solid fa-tag"></i>
+
+                <span class="flex-1 ms-3 whitespace-nowrap">
+                  Prekės (BARCODE)
+                </span>
               </Link>
             </li>
             <li>
