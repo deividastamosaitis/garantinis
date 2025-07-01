@@ -193,17 +193,10 @@ export const updateServiceTicket = async (req, res) => {
         const rma = ticket.product?.externalService?.rmaCode || "nežinomas";
         await sendEmail({
           to: ticket.client.email,
-          subject: `🔄 Serviso statusas atnaujintas (${rma})`,
-          text: `Sveiki,
-
-Jūsų įrenginio remonto statusas buvo atnaujintas.
-
-📌 Naujas statusas: ${update.status}
-
-Jei turite klausimų - atsakykite į šį el.paštą.
-
-Pagarbiai,
-GPSmeistras servisas`,
+          rmaCode: rma,
+          status: update.status,
+          product: ticket.product,
+          problemDescription: ticket.problemDescription,
         });
       }
     }

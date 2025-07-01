@@ -89,6 +89,7 @@ export default function Redaguoti() {
             <option value="Kamera">Kamera</option>
             <option value="Registratorius">Registratorius</option>
             <option value="Radaras">Radaras</option>
+            <option value="Kita">Kita</option>
           </select>
           <input
             name="product.brand"
@@ -132,11 +133,15 @@ export default function Redaguoti() {
             className="input"
             required
           >
-            <option value="Naujas">Naujas</option>
+            <option value="Užregistruota">Užregistruota</option>
+            <option value="Prekė gauta į servisą">Prekė gauta į servisą</option>
             <option value="Diagnostika">Diagnostika</option>
             <option value="Dalių užsakymas">Dalių užsakymas</option>
             <option value="Remontuojama">Remontuojama</option>
             <option value="Paruošta atsiėmimui">Paruošta atsiėmimui</option>
+            <option value="Prekė išsiųsta klientui">
+              Prekė išsiųsta klientui
+            </option>
             <option value="Uždaryta">Uždaryta</option>
           </select>
         </div>

@@ -86,12 +86,12 @@ export default function Servisas() {
         </button>
       </form>
 
-      <Link
+      {/* <Link
         to="pildyti"
         className="btn bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded"
       >
         + Naujas įrašas
-      </Link>
+      </Link> */}
 
       {/* Lentelė */}
       <div className="overflow-x-auto">

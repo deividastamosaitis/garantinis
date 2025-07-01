@@ -25,7 +25,7 @@ const ServiceTicketSchema = new mongoose.Schema({
   product: {
     category: {
       type: String,
-      enum: ["Robotas", "Kamera", "Registratorius", "Radaras"],
+      enum: ["Robotas", "Kamera", "Registratorius", "Radaras", "Kita"],
     },
     brand: String,
     model: String,
@@ -37,11 +37,13 @@ const ServiceTicketSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: [
-      "Naujas",
+      "Užregistruota",
+      "Prekė gauta į servisą",
       "Diagnostika",
       "Dalių užsakymas",
       "Remontuojama",
       "Paruošta atsiėmimui",
+      "Prekė išsiųsta klientui",
       "Uždaryta",
     ],
     default: "Naujas",
