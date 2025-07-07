@@ -1,6 +1,7 @@
 import Garantinis from "../models/GarantinisModel.js";
 import { StatusCodes } from "http-status-codes";
 import Prekes from "../models/PrekeModel.js";
+import { generateGarantinisPDF } from "../utils/pdfGenerator.js";
 
 export const getAllGarantinis = async (req, res) => {
   const garantinis = await Garantinis.find({})
@@ -219,32 +220,33 @@ export const getStatistics = async (req, res) => {
 };
 
 export const createGarantinis = async (req, res) => {
-  const { klientas, prekes, atsiskaitymas, kvitas, saskaita, totalKaina } =
-    req.body;
+  const {
+    klientas,
+    prekes,
+    atsiskaitymas,
+    kvitas,
+    saskaita,
+    totalKaina,
+    signature,
+  } = req.body;
   const userId = req.user.userId;
 
   try {
-    // First save/update all products
     await Promise.all(
       prekes.map(async (preke) => {
         if (preke.barkodas && preke.pavadinimas) {
-          try {
-            await Prekes.findOneAndUpdate(
-              { barkodas: preke.barkodas },
-              {
-                pavadinimas: preke.pavadinimas,
-                createdBy: userId,
-              },
-              { upsert: true, new: true }
-            );
-          } catch (error) {
-            console.error(`Klaida išsaugant prekę ${preke.barkodas}:`, error);
-          }
+          await Prekes.findOneAndUpdate(
+            { barkodas: preke.barkodas },
+            {
+              pavadinimas: preke.pavadinimas,
+              createdBy: userId,
+            },
+            { upsert: true, new: true }
+          );
         }
       })
     );
 
-    // Then create the garantinis record
     const garantinis = await Garantinis.create({
       klientas,
       prekes,
@@ -255,11 +257,17 @@ export const createGarantinis = async (req, res) => {
       createdBy: userId,
     });
 
+    const pdfUrl = await generateGarantinisPDF(garantinis, signature);
+    garantinis.pdfPath = pdfUrl;
+    await garantinis.save();
+
     res.status(StatusCodes.CREATED).json({
       success: true,
       data: garantinis,
+      pdfUrl,
     });
   } catch (error) {
+    console.error("Garantinio kūrimo klaida:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Klaida kuriant garantinį įrašą",
@@ -499,5 +507,25 @@ export const getSalesStatistics = async (req, res) => {
       message: "Nepavyko gauti statistikos",
       error: error.message,
     });
+  }
+};
+export const updateGarantinisSignature = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { signature } = req.body;
+
+    const garantinis = await Garantinis.findById(id);
+    if (!garantinis) {
+      return res.status(404).json({ success: false, message: "Nerastas" });
+    }
+
+    const pdfUrl = await generateGarantinisPDF(garantinis, signature);
+    garantinis.pdfPath = pdfUrl;
+    await garantinis.save();
+
+    res.status(200).json({ success: true, pdfUrl });
+  } catch (err) {
+    console.error("Klaida atnaujinant parašą:", err);
+    res.status(500).json({ success: false, message: "Serverio klaida" });
   }
 };

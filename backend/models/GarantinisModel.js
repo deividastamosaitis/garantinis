@@ -73,6 +73,9 @@ const GarantinisSchema = new mongoose.Schema({
     default: Date.now,
     required: true,
   },
+  pdfPath: {
+    type: String,
+  },
   updatedAt: {
     type: Date,
     default: Date.now,

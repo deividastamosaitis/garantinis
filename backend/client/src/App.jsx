@@ -21,6 +21,7 @@ import KStatistika from "./pages/garantiniai/KStatistika";
 import EditGarantinis from "./pages/garantiniai/EditGarantinis";
 import Alkotesteriai from "./pages/Alkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
+import Pasirasymas from "./pages/garantiniai/Pasirasymas";
 import AiBOT from "./pages/AiBOT";
 
 //SERVISAS
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
         path: "login",
         element: <Login />,
         action: loginAction,
+      },
+      {
+        path: "garantinis/pasirasymas/:id",
+        element: <Pasirasymas />,
       },
       {
         path: "garantinis",

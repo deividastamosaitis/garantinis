@@ -42,8 +42,10 @@ if (process.env.NODE_ENV === "development") {
 }
 
 app.use(express.static(path.resolve(__dirname, "./public")));
+
 app.use(cookieParser());
 app.use(express.json());
+app.use("/uploads", express.static(path.join("public/uploads")));
 
 app.use("/api/prekes", authenticateUser, PrekeRouter);
 app.use("/api/users", authenticateUser, userRouter);
