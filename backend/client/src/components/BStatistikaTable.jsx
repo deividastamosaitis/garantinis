@@ -11,6 +11,7 @@ const BStatistikaTable = ({
   saskaita,
   createdBy,
   createdAt,
+  pdfPath,
 }) => {
   const date = new Date(createdAt);
   const isValidDate = !isNaN(date.getTime());
@@ -60,13 +61,25 @@ const BStatistikaTable = ({
       <td className="px-6 py-4">{saskaita}</td>
       <td className="px-6 py-4">{kvitas}</td>
       <td className="px-6 py-4">{createdBy?.vardas || "-"}</td>
-      <td className="px-6 py-4">
+      <td className="px-6 py-4 flex flex-col gap-1">
         <Link
           to={`../garantinis/${_id}`}
           className="text-blue-500 hover:underline"
         >
           Redaguoti
         </Link>
+        {pdfPath && (
+          <a
+            href={pdfPath}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            className="text-green-600 hover:underline text-sm"
+            title="Atsisiųsti PDF"
+          >
+            📄
+          </a>
+        )}
       </td>
     </tr>
   );

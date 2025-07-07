@@ -2,6 +2,7 @@ import Garantinis from "../models/GarantinisModel.js";
 import { StatusCodes } from "http-status-codes";
 import Prekes from "../models/PrekeModel.js";
 import { generateGarantinisPDF } from "../utils/pdfGenerator.js";
+import { atidarytiGarantiniPasirasymui } from "../utils/fullyKiosk.js";
 
 export const getAllGarantinis = async (req, res) => {
   const garantinis = await Garantinis.find({})
@@ -229,9 +230,11 @@ export const createGarantinis = async (req, res) => {
     totalKaina,
     signature,
   } = req.body;
+
   const userId = req.user.userId;
 
   try {
+    // Įrašome / atnaujiname prekes
     await Promise.all(
       prekes.map(async (preke) => {
         if (preke.barkodas && preke.pavadinimas) {
@@ -247,6 +250,7 @@ export const createGarantinis = async (req, res) => {
       })
     );
 
+    // Sukuriame garantinį įrašą
     const garantinis = await Garantinis.create({
       klientas,
       prekes,
@@ -257,9 +261,23 @@ export const createGarantinis = async (req, res) => {
       createdBy: userId,
     });
 
-    const pdfUrl = await generateGarantinisPDF(garantinis, signature);
-    garantinis.pdfPath = pdfUrl;
-    await garantinis.save();
+    // Tikrinam ar reikia PDF ir pasirašymo
+    const atsiskaitymoTipai = atsiskaitymas.map((a) => a.tipas);
+    const reikiaPasirasymo = atsiskaitymoTipai.some(
+      (tipas) => tipas === "grynais" || tipas === "kortele"
+    );
+
+    let pdfUrl = null;
+
+    if (reikiaPasirasymo) {
+      pdfUrl = await generateGarantinisPDF(garantinis, signature);
+      garantinis.pdfPath = pdfUrl;
+      await garantinis.save();
+
+      await atidarytiGarantiniPasirasymui(garantinis._id);
+    } else {
+      await garantinis.save();
+    }
 
     res.status(StatusCodes.CREATED).json({
       success: true,
@@ -274,7 +292,6 @@ export const createGarantinis = async (req, res) => {
     });
   }
 };
-
 export const getGarantinis = async (req, res) => {
   try {
     const garantinis = await Garantinis.findById(req.params.id).populate(
@@ -301,21 +318,45 @@ export const getGarantinis = async (req, res) => {
 
 export const updateGarantinis = async (req, res) => {
   try {
-    const updatedGarantinis = await Garantinis.findByIdAndUpdate(
+    const { signature, ...updates } = req.body;
+
+    const garantinis = await Garantinis.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       { new: true, runValidators: true }
     ).populate("createdBy", "vardas email");
 
+    if (!garantinis) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Garantinis nerastas",
+      });
+    }
+
+    // Patikrinam ar reikia pasirašymo
+    const atsiskaitymoTipai = garantinis.atsiskaitymas.map((a) => a.tipas);
+    const reikiaPasirasymo = atsiskaitymoTipai.some(
+      (tipas) => tipas === "grynais" || tipas === "kortele"
+    );
+
+    let pdfUrl = garantinis.pdfPath;
+
+    if (reikiaPasirasymo && signature) {
+      pdfUrl = await generateGarantinisPDF(garantinis, signature);
+      garantinis.pdfPath = pdfUrl;
+      await garantinis.save();
+    }
+
     res.status(StatusCodes.OK).json({
       success: true,
-      message: "Garantinis updated",
-      garantinis: updatedGarantinis,
+      message: "Garantinis atnaujintas",
+      garantinis,
+      pdfUrl,
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Failed to update garantinis",
+      message: "Nepavyko atnaujinti garantinio",
       error: error.message,
     });
   }
@@ -519,13 +560,28 @@ export const updateGarantinisSignature = async (req, res) => {
       return res.status(404).json({ success: false, message: "Nerastas" });
     }
 
+    // Tikrinam ar atsiskaitymas reikalauja parašo
+    const atsiskaitymoTipai = garantinis.atsiskaitymas.map((a) => a.tipas);
+    const reikiaPasirasymo = atsiskaitymoTipai.some(
+      (tipas) => tipas === "grynais" || tipas === "kortele"
+    );
+
+    if (!reikiaPasirasymo) {
+      return res.status(200).json({
+        success: true,
+        message: "Parašas nereikalingas šiam atsiskaitymo tipui",
+        pdfUrl: garantinis.pdfPath || null,
+      });
+    }
+
+    // Jei reikia — generuojam naują PDF su parašu
     const pdfUrl = await generateGarantinisPDF(garantinis, signature);
     garantinis.pdfPath = pdfUrl;
     await garantinis.save();
 
     res.status(200).json({ success: true, pdfUrl });
   } catch (err) {
-    console.error("Klaida atnaujinant parašą:", err);
+    console.error("❌ Klaida atnaujinant parašą:", err);
     res.status(500).json({ success: false, message: "Serverio klaida" });
   }
 };

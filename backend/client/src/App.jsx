@@ -22,6 +22,7 @@ import EditGarantinis from "./pages/garantiniai/EditGarantinis";
 import Alkotesteriai from "./pages/Alkotesteriai";
 import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
 import Pasirasymas from "./pages/garantiniai/Pasirasymas";
+import Laukimas from "./pages/Laukimas";
 import AiBOT from "./pages/AiBOT";
 
 //SERVISAS
@@ -69,6 +70,7 @@ import { loader as DStatistikaLoader } from "./pages/garantiniai/DStatistika";
 import { loader as BStatistikaLoader } from "./pages/garantiniai/BStatistika";
 import { loader as userLoader } from "./pages/Layout";
 import { loader as garantinisLoader } from "./pages/garantiniai/EditGarantinis";
+import { loader as pasirasymasLoader } from "./pages/garantiniai/Pasirasymas";
 import { loader as klientaiLoader } from "./pages/Klientai";
 import { loader as statistikaLoader } from "./pages/garantiniai/PStatistika";
 import { loader as alkotesteriaiLoader } from "./pages/Alkotesteriai";
@@ -97,6 +99,11 @@ const router = createBrowserRouter([
       {
         path: "garantinis/pasirasymas/:id",
         element: <Pasirasymas />,
+        loader: pasirasymasLoader,
+      },
+      {
+        path: "laukimas",
+        element: <Laukimas />,
       },
       {
         path: "garantinis",

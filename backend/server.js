@@ -50,7 +50,7 @@ app.use("/uploads", express.static(path.join("public/uploads")));
 app.use("/api/prekes", authenticateUser, PrekeRouter);
 app.use("/api/users", authenticateUser, userRouter);
 app.use("/api/klientai", authenticateUser, KlientasRouter);
-app.use("/api/garantinis", authenticateUser, GarantinisRouter);
+app.use("/api/garantinis", GarantinisRouter);
 app.use("/api/alkotesteriai", authenticateUser, AlkotesterisRouter);
 app.use("/api/rma", authenticateUser, RMARouter);
 app.use("/api/auth", authRouter);

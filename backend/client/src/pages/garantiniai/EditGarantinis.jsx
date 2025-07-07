@@ -20,6 +20,19 @@ export const loader = async ({ params }) => {
 };
 
 export const action = async ({ request, params }) => {
+  const method = request.method;
+
+  if (method === "DELETE") {
+    try {
+      await customFetch.delete(`/garantinis/${params.id}`);
+      toast.success("Garantinis sėkmingai ištrintas");
+      return redirect("/garantinis/d_statistika");
+    } catch (error) {
+      toast.error("Klaida trinant garantinį");
+      return null;
+    }
+  }
+
   const formData = await request.formData();
 
   // Surinkti atsiskaitymo masyvą

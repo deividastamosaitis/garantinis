@@ -15,18 +15,22 @@ import {
   updateGarantinisSignature,
 } from "../controllers/garantinisController.js";
 import { validateGarantinisIdParam } from "../middlewares/validationMiddleware.js";
+import { authenticateUser } from "../middlewares/authMiddleware.js";
 
-router.route("/").post(createGarantinis).get(getAllGarantinis);
-router.route("/today").get(getTodayGarantinis);
-router.route("/search").get(searchGarantinisByClient);
-router.route("/statistics").get(getSalesStatistics);
-router.route("/statistika").get(getStatistics);
+router
+  .route("/")
+  .post(authenticateUser, createGarantinis)
+  .get(getAllGarantinis);
+router.route("/today").get(authenticateUser, getTodayGarantinis);
+router.route("/search").get(authenticateUser, searchGarantinisByClient);
+router.route("/statistics").get(authenticateUser, getSalesStatistics);
+router.route("/statistika").get(authenticateUser, getStatistics);
 router.patch("/:id/signature", updateGarantinisSignature);
 
 router
   .route("/:id")
   .get(validateGarantinisIdParam, getGarantinis)
-  .patch(validateGarantinisIdParam, updateGarantinis)
-  .delete(deleteGarantinis);
+  .patch(authenticateUser, validateGarantinisIdParam, updateGarantinis)
+  .delete(authenticateUser, deleteGarantinis);
 
 export default router;

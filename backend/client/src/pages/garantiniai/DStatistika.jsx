@@ -122,6 +122,7 @@ const DStatistika = () => {
                 createdBy={pirkejas.createdBy}
                 createdAt={pirkejas.createdAt}
                 originalDate={pirkejas.originalDate}
+                pdfPath={pirkejas.pdfPath}
                 showPayments={isPrivilegedUser}
                 showEdit={isAdmin}
               />

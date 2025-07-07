@@ -269,6 +269,7 @@ const BStatistika = () => {
                 kvitas={pirkejas.kvitas}
                 createdBy={pirkejas.createdBy}
                 createdAt={pirkejas.createdAt}
+                pdfPath={pirkejas.pdfPath}
               />
             ))}
           </tbody>
