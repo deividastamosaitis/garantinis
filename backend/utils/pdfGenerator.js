@@ -1,9 +1,9 @@
-const PDFDocument = require("pdfkit");
-const fs = require("fs");
-const path = require("path");
-const { salygosText } = require("../data/salygosText.js");
+import PDFDocument from "pdfkit";
+import fs from "fs";
+import path from "path";
+import { salygosText } from "../data/salygosText.js";
 
-const generateGarantinisPDF = async (garantinis, signatureBase64) => {
+export const generateGarantinisPDF = async (garantinis, signatureBase64) => {
   const uploadsDir = path.resolve("public/uploads");
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -15,6 +15,8 @@ const generateGarantinisPDF = async (garantinis, signatureBase64) => {
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
+    // const fontPath = path.resolve("fonts/Roboto-Regular.ttf");
+    // doc.registerFont("Roboto", fontPath);
     doc.font("Helvetica");
 
     // 1. Sąlygų puslapis
@@ -30,6 +32,7 @@ const generateGarantinisPDF = async (garantinis, signatureBase64) => {
     doc.fontSize(18).text("Garantinio dokumentas", { align: "center" });
     doc.moveDown(1.5);
 
+    // Kliento informacija
     doc
       .fontSize(12)
       .fillColor("black")
@@ -41,6 +44,7 @@ const generateGarantinisPDF = async (garantinis, signatureBase64) => {
     doc.text(`Miestas: ${garantinis.klientas.miestas}`);
     doc.moveDown();
 
+    // Prekių lentelė su rėmeliais
     doc.fontSize(12).text("Prekės:", { underline: true });
     doc.moveDown(0.5);
 
@@ -51,6 +55,7 @@ const generateGarantinisPDF = async (garantinis, signatureBase64) => {
       kaina: 420,
     };
 
+    // Header
     doc.rect(itemX.pavadinimas, tableTop, 500, 20).stroke();
     doc
       .fontSize(10)
@@ -70,6 +75,8 @@ const generateGarantinisPDF = async (garantinis, signatureBase64) => {
     });
 
     doc.moveDown(3);
+
+    // Atsiskaitymas ir parašas
     doc.fontSize(12).text("Atsiskaitymo informacija:", { underline: true });
     doc.moveDown(0.5);
     garantinis.atsiskaitymas.forEach((a) => {
@@ -89,15 +96,17 @@ const generateGarantinisPDF = async (garantinis, signatureBase64) => {
 
     if (signatureBase64) {
       const imageBuffer = Buffer.from(signatureBase64.split(",")[1], "base64");
-      doc.image(imageBuffer, { fit: [200, 100], align: "left" });
+      doc.image(imageBuffer, {
+        fit: [200, 100],
+        align: "left",
+      });
     } else {
       doc.text("(Parašas negautas)");
     }
 
+    // Uždarymas
     doc.end();
     stream.on("finish", () => resolve(`/uploads/${fileName}`));
     stream.on("error", reject);
   });
 };
-
-module.exports = { generateGarantinisPDF };
