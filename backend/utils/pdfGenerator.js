@@ -15,9 +15,11 @@ export const generateGarantinisPDF = async (garantinis, signatureBase64) => {
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    // const fontPath = path.resolve("fonts/Roboto-Regular.ttf");
-    // doc.registerFont("Roboto", fontPath);
-    doc.font("Helvetica");
+    doc.registerFont(
+      "Roboto",
+      "/volume1/sites/garantinis/backend/fonts/Roboto-Regular.ttf"
+    );
+    doc.font("Roboto");
 
     // 1. Sąlygų puslapis
     doc.addPage();
