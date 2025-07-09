@@ -16,6 +16,7 @@ const Pildyti = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rodytiModal, setRodytiModal] = useState(false);
   const [salinimoIndeksas, setSalinimoIndeksas] = useState(null);
+  const [reikiaGarantinio, setReikiaGarantinio] = useState(false);
 
   // Debounce function to limit API calls
   const debounce = (func, delay) => {
@@ -162,6 +163,7 @@ const Pildyti = () => {
         totalKaina,
         createdBy: userId,
         createdAt,
+        reikiaGarantinio,
       };
 
       const response = await fetch("/api/garantinis", {
@@ -487,6 +489,18 @@ const Pildyti = () => {
               Krepšelio kaina:
             </label>
             <p className="text-lg font-semibold">{totalKaina.toFixed(2)} €</p>
+          </div>
+          <div className="col-span-full mt-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="reikiaGarantinio"
+                checked={reikiaGarantinio}
+                onChange={(e) => setReikiaGarantinio(e.target.checked)}
+                className="w-4 h-4"
+              />
+              Reikia pasirašyti garantinė sutartį
+            </label>
           </div>
         </div>
 

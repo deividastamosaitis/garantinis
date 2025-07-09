@@ -68,24 +68,51 @@ const DStatistikaTable = ({
       <td className="px-6 py-4">{kvitas}</td>
       <td className="px-6 py-4">{createdBy?.vardas || "—"}</td>
       {showEdit && (
-        <td className="px-6 py-4 flex flex-col gap-1">
-          <Link
-            to={`../garantinis/${_id}`}
-            className="text-blue-500 hover:underline"
-          >
-            Redaguoti
-          </Link>
-          {pdfPath && (
-            <a
-              href={pdfPath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-green-600 hover:underline"
-              title="Peržiūrėti PDF"
+        <td className="px-6 py-4">
+          <div className="flex flex-col items-start space-y-2">
+            <Link
+              to={`../garantinis/${_id}`}
+              className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm"
             >
-              📄
-            </a>
-          )}
+              ✏️ <span className="ml-1">Redaguoti</span>
+            </Link>
+
+            {pdfPath && (
+              <a
+                href={pdfPath}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-green-600 hover:text-green-800 text-sm"
+                title="Peržiūrėti PDF"
+              >
+                📄 <span className="ml-1">Peržiūrėti</span>
+              </a>
+            )}
+
+            <button
+              onClick={async () => {
+                try {
+                  const token = localStorage.getItem("token");
+                  const res = await fetch(
+                    `/api/garantinis/${_id}/resend-signature`,
+                    {
+                      method: "POST",
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  );
+                  if (res.ok) alert("Išsiųsta į planšetę!");
+                  else alert("Klaida siunčiant.");
+                } catch (err) {
+                  console.error("❌", err);
+                  alert("Serverio klaida.");
+                }
+              }}
+              className="inline-flex items-center text-orange-600 hover:text-orange-800 text-sm"
+              title="Išsiųsti dar kartą pasirašyti"
+            >
+              🔁 <span className="ml-1">Siųsti iš naujo</span>
+            </button>
+          </div>
         </td>
       )}
     </tr>

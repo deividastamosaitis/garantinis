@@ -229,6 +229,7 @@ export const createGarantinis = async (req, res) => {
     saskaita,
     totalKaina,
     signature,
+    reikiaGarantinio,
   } = req.body;
 
   const userId = req.user.userId;
@@ -261,15 +262,10 @@ export const createGarantinis = async (req, res) => {
       createdBy: userId,
     });
 
-    // Tikrinam ar reikia PDF ir pasirašymo
-    const atsiskaitymoTipai = atsiskaitymas.map((a) => a.tipas);
-    const reikiaPasirasymo = atsiskaitymoTipai.some(
-      (tipas) => tipas === "grynais" || tipas === "kortele"
-    );
-
     let pdfUrl = null;
 
-    if (reikiaPasirasymo) {
+    // Patikrinam ar reikia pasirašymo pagal checkbox'ą
+    if (reikiaGarantinio) {
       pdfUrl = await generateGarantinisPDF(garantinis, signature);
       garantinis.pdfPath = pdfUrl;
       await garantinis.save();
@@ -582,6 +578,37 @@ export const updateGarantinisSignature = async (req, res) => {
     res.status(200).json({ success: true, pdfUrl });
   } catch (err) {
     console.error("❌ Klaida atnaujinant parašą:", err);
+    res.status(500).json({ success: false, message: "Serverio klaida" });
+  }
+};
+
+export const resendGarantinisSignature = async (req, res) => {
+  try {
+    const garantinis = await Garantinis.findById(req.params.id);
+    if (!garantinis) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Garantinis nerastas" });
+    }
+
+    // Patikrinti, ar reikia parašo
+    const tipai = garantinis.atsiskaitymas.map((a) => a.tipas);
+    const reikiaPasirasymo =
+      tipai.includes("grynais") || tipai.includes("kortele");
+
+    if (!reikiaPasirasymo) {
+      return res.status(400).json({
+        success: false,
+        message: "Šiam įrašui nereikia pasirašymo",
+      });
+    }
+
+    // Siunčiame į planšetę
+    await atidarytiGarantiniPasirasymui(garantinis._id);
+
+    res.status(200).json({ success: true, message: "Išsiųsta į planšetę" });
+  } catch (err) {
+    console.error("❌ Klaida siunčiant pakartotinai:", err);
     res.status(500).json({ success: false, message: "Serverio klaida" });
   }
 };
