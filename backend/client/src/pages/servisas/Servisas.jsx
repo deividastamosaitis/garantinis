@@ -98,6 +98,7 @@ export default function Servisas() {
         <table className="w-full text-sm border-collapse">
           <thead className="bg-gray-100">
             <tr>
+              <th className="px-4 py-2 border-b text-left">Data</th>
               <th className="px-4 py-2 border-b text-left">Vardas</th>
               <th className="px-4 py-2 border-b text-left">Telefonas</th>
               <th className="px-4 py-2 border-b text-left">Modelis</th>
@@ -115,6 +116,17 @@ export default function Servisas() {
                   i % 2 === 0 ? "bg-white" : "bg-gray-50"
                 } hover:bg-blue-50`}
               >
+                <td className="px-4 py-2 whitespace-nowrap">
+                  {r.receivedDate
+                    ? new Date(r.receivedDate).toLocaleString("lt-LT", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "—"}
+                </td>
                 <td className="px-4 py-2">{r.client?.name || "—"}</td>
                 <td className="px-4 py-2">{r.client?.phone || "—"}</td>
                 <td className="px-4 py-2">{r.product?.model || "—"}</td>
