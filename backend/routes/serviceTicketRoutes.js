@@ -8,6 +8,8 @@ import {
   updateServiceTicket,
   deleteServiceTicket,
   updateExternalServiceInfo,
+  sendClientInquiry,
+  addClientReply,
 } from "../controllers/serviceTicketController.js";
 
 import { authenticateUser } from "../middlewares/authMiddleware.js";
@@ -25,6 +27,8 @@ router
   .delete(authenticateUser, deleteServiceTicket);
 
 router.post("/public", createServiceTicket);
+router.post("/:id/inquiry", authenticateUser, sendClientInquiry);
+router.post("/:id/inquiry-reply", authenticateUser, addClientReply);
 
 router.patch("/:id/external", authenticateUser, updateExternalServiceInfo);
 

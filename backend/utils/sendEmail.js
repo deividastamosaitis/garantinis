@@ -19,24 +19,38 @@ export const sendEmail = async ({
   status,
   product,
   problemDescription,
+  message,
+  type, // 👈 papildytas "type" laukas
 }) => {
-  const frontendUrl = "https://servisas.gpsmeistras.lt"; // ar iš .env
-
-  const linkHtml = `
-    <br/><br/>
-    <a href="${frontendUrl}/status/${rmaCode}" 
-       style="display:inline-block;padding:10px 20px;background:#0056A0;color:#fff;border-radius:5px;text-decoration:none">
-      Peržiūrėti RMA statusą
-    </a>
-  `;
+  const frontendUrl = "https://servisas.gpsmeistras.lt";
 
   let subject = "";
   let text = "";
 
-  switch (status) {
-    case "Registruota":
-      subject = `✅ Jūsų RMA registracija sėkminga – ${rmaCode}`;
-      text = `
+  // 👇 Užklausos el. laiškas (nepriklauso nuo statuso)
+  if (type === "inquiry") {
+    subject = `❓ Klausimas dėl Jūsų RMA – ${rmaCode || "Nežinomas"}`;
+    text = `
+Sveiki,
+
+Turime klausimą/papildomą užklausą dėl Jūsų remonto:
+
+${message}
+
+Jei turite papildomų klausimų – atsakykite į šį laišką.
+
+GPSmeistras Servisas,
+UAB Todesa
+Jonavos g. 204A, Kaunas
++370 37208164
+${rmaCode ? `\nSekimo nuoroda: ${frontendUrl}/status/${rmaCode}` : ""}
+    `;
+  } else {
+    // 👇 Statuso el. laiškai – esami šablonai
+    switch (status) {
+      case "Registruota":
+        subject = `✅ Jūsų RMA registracija sėkminga – ${rmaCode}`;
+        text = `
 Jūsų remonto registracija RMA kodas sėkminga.
 
 Prietaisas: ${product?.brand || ""} ${product?.model || ""}
@@ -48,12 +62,12 @@ arba atsakykite į šį laišką.
 
 Neatsakydami patvirtinate, kad pateikiama informacija yra teisinga.
 ${frontendUrl}/status/${rmaCode}
-      `;
-      break;
+        `;
+        break;
 
-    case "Paruošta atsiėmimui":
-      subject = `📦 Įrenginys paruoštas atsiėmimui – ${rmaCode}`;
-      text = `
+      case "Paruošta atsiėmimui":
+        subject = `📦 Įrenginys paruoštas atsiėmimui – ${rmaCode}`;
+        text = `
 Sveiki,
 
 Jūsų įrenginio remonto statusas buvo atnaujintas.
@@ -66,12 +80,12 @@ Jonavos g. 204A, Kaunas.
 Jei norite, kad siuntą išsiųstume LPExpress kurjeriu ar paštomatu – atsakykite į šį laišką su adresu.
 
 ${frontendUrl}/status/${rmaCode}
-      `;
-      break;
+        `;
+        break;
 
-    case "Prekė išsiųsta klientui":
-      subject = `📮 Siunta išsiųsta – ${rmaCode}`;
-      text = `
+      case "Prekė išsiųsta klientui":
+        subject = `📮 Siunta išsiųsta – ${rmaCode}`;
+        text = `
 Sveiki,
 
 Jūsų įrenginys buvo perduotas LPExpress kurjeriams.
@@ -79,23 +93,23 @@ Jūsų įrenginys buvo perduotas LPExpress kurjeriams.
 Prekė jus pasieks per 1–5 darbo dienas.
 
 ${frontendUrl}/status/${rmaCode}
-      `;
-      break;
+        `;
+        break;
 
-    default:
-      subject = `🔄 RMA statusas atnaujintas – ${rmaCode}`;
-      text = `
+      default:
+        subject = `🔄 RMA statusas atnaujintas – ${rmaCode}`;
+        text = `
 Sveiki,
 
 Jūsų įrenginio remonto statusas buvo atnaujintas.
 
-📌 Naujas statusas: ${status}
+📌 Naujas statusas: ${status || "Nežinomas"}
 
 Jei turite klausimų – atsakykite į šį el. laišką.
 
 Remonto sekimo nuoroda: ${frontendUrl}/status/${rmaCode}
-      `;
-      break;
+        `;
+    }
   }
 
   try {
@@ -105,7 +119,12 @@ Remonto sekimo nuoroda: ${frontendUrl}/status/${rmaCode}
       subject,
       text,
     });
-    console.log("✅ Laiškas išsiųstas:", result.messageId);
+    console.log(
+      "✅ Laiškas išsiųstas:",
+      result.messageId,
+      "| tipas:",
+      type || "status"
+    );
     return result;
   } catch (error) {
     console.error("❌ Laiško siuntimo klaida:", error);

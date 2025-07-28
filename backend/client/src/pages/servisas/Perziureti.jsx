@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { useLoaderData, Link } from "react-router-dom";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
@@ -24,7 +26,32 @@ const statusColors = {
 
 export default function Perziureti() {
   const ticket = useLoaderData();
+  const [urlError, setUrlError] = useState({});
+
+  function getMediaUrl(name) {
+    const clientServer = import.meta.env.VITE_FILE_SERVER_URL;
+    const internalServer = import.meta.env.VITE_INTERNAL_FILE_SERVER_URL;
+
+    return urlError[name]
+      ? `${clientServer}/uploads/${name}`
+      : `${internalServer}/uploads/${name}`;
+  }
+
+  const [clientReply, setClientReply] = useState("");
+  const lastInquiryIndex = [...(ticket.history || [])]
+    .reverse()
+    .findIndex((h) => h.note?.startsWith("Išsiųsta užklausa klientui"));
+
+  const reversedHistory = [...(ticket.history || [])].reverse();
+  const lastInquiry =
+    lastInquiryIndex !== -1 ? reversedHistory[lastInquiryIndex] : null;
+  const lastReply =
+    lastInquiryIndex !== -1 ? reversedHistory[lastInquiryIndex - 1] : null;
   const statusColor = statusColors[ticket.status] || "bg-gray-300";
+  const [showInquiry, setShowInquiry] = useState(false);
+  const [inquiryText, setInquiryText] = useState("");
+  const [sending, setSending] = useState(false);
+  const { id } = useParams();
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8">
@@ -70,39 +97,6 @@ export default function Perziureti() {
           </p>
         </div>
 
-        {/* Video ar FOTO */}
-        {ticket.attachments.map((name) => {
-          const fileServer = import.meta.env.VITE_FILE_SERVER_URL;
-          const url = `${fileServer}/uploads/${name}`;
-          const isImage = name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-          const isVideo = name.match(/\.(mp4|webm|mov|avi)$/i);
-
-          return (
-            <div key={name} className="border p-2 rounded bg-gray-50">
-              {isImage && (
-                <img
-                  src={url}
-                  alt={name}
-                  className="max-w-full h-auto rounded"
-                />
-              )}
-              {isVideo && (
-                <video src={url} controls className="w-full rounded" />
-              )}
-              {!isImage && !isVideo && (
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  Atsisiųsti: {name}
-                </a>
-              )}
-            </div>
-          );
-        })}
-
         {/* Statusas */}
         <div className="bg-white shadow rounded p-4 border">
           <h2 className="font-semibold text-lg mb-2">📌 Statusas</h2>
@@ -117,6 +111,149 @@ export default function Perziureti() {
         <div className="bg-white shadow rounded p-4 border">
           <h2 className="font-semibold text-lg mb-2">👨‍🔧 Darbuotojas</h2>
           <p>{ticket.assignedTo || "—"}</p>
+        </div>
+
+        {/* Video ar FOTO */}
+        {ticket.attachments.map((name) => {
+          const isImage = name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+          const isVideo = name.match(/\.(mp4|webm|mov|avi)$/i);
+          const mediaUrl = getMediaUrl(name);
+
+          return (
+            <div key={name} className="border p-2 rounded bg-gray-50">
+              {isImage && (
+                <img
+                  src={mediaUrl}
+                  onError={() =>
+                    setUrlError((prev) => ({ ...prev, [name]: true }))
+                  }
+                  alt={name}
+                  className="max-w-full h-auto rounded"
+                />
+              )}
+              {isVideo && (
+                <video
+                  src={mediaUrl}
+                  onError={() =>
+                    setUrlError((prev) => ({ ...prev, [name]: true }))
+                  }
+                  controls
+                  className="w-full rounded"
+                />
+              )}
+              {!isImage && !isVideo && (
+                <a
+                  href={mediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  Atsisiųsti: {name}
+                </a>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Užklausa */}
+        <div className="space-y-2 mt-4">
+          <button
+            onClick={() => setShowInquiry((prev) => !prev)}
+            className="btn bg-yellow-400 hover:bg-yellow-500 text-black"
+          >
+            ✉️ Užklausa klientui
+          </button>
+          {showInquiry && (
+            <div className="space-y-2">
+              <textarea
+                className="input w-full"
+                rows={4}
+                value={inquiryText}
+                onChange={(e) => setInquiryText(e.target.value)}
+                placeholder="Įveskite klausimą ar pastabą klientui"
+              />
+              <button
+                type="button"
+                className="btn bg-green-600 hover:bg-green-700 text-white"
+                disabled={sending || !inquiryText.trim()}
+                onClick={async () => {
+                  try {
+                    setSending(true);
+                    await customFetch.post(`/tickets/${id}/inquiry`, {
+                      message: inquiryText,
+                    });
+                    toast.success("Užklausa išsiųsta klientui");
+                    setInquiryText("");
+                    setShowInquiry(false);
+                  } catch (err) {
+                    toast.error(
+                      err.response?.data?.error || "Nepavyko išsiųsti užklausos"
+                    );
+                  } finally {
+                    setSending(false);
+                  }
+                }}
+              >
+                📤 Siųsti užklausą
+              </button>
+            </div>
+          )}
+
+          {lastInquiry && (
+            <div className="text-sm text-gray-700 border-l-4 border-yellow-300 pl-3 py-2 mt-1 bg-yellow-50 rounded">
+              <strong>Paskutinė užklausa:</strong>
+              <br />
+              <span className="whitespace-pre-wrap">{lastInquiry.note}</span>
+              <br />
+              <small className="text-xs text-gray-500">
+                {new Date(lastInquiry.date).toLocaleString("lt-LT")} (
+                {lastInquiry.from || "—"})
+              </small>
+
+              {lastReply && (
+                <div className="mt-3 border-t pt-2">
+                  <strong>Kliento atsakymas:</strong>
+                  <br />
+                  <span className="whitespace-pre-wrap">{lastReply.note}</span>
+                  <br />
+                  <small className="text-xs text-gray-500">
+                    {new Date(lastReply.date).toLocaleString("lt-LT")} (
+                    {lastReply.from || "—"})
+                  </small>
+                </div>
+              )}
+            </div>
+          )}
+
+          {lastInquiry && (
+            <div className="mt-2 space-y-2">
+              <textarea
+                rows={3}
+                className="input w-full"
+                value={clientReply}
+                placeholder="Įrašykite kliento atsakymą"
+                onChange={(e) => setClientReply(e.target.value)}
+              />
+              <button
+                className="btn bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={!clientReply.trim()}
+                onClick={async () => {
+                  try {
+                    await customFetch.post(`/tickets/${id}/inquiry-reply`, {
+                      reply: clientReply,
+                    });
+                    toast.success("Atsakymas įrašytas");
+                    setClientReply("");
+                    window.location.reload(); // arba refetch loader'į
+                  } catch (err) {
+                    toast.error("Nepavyko išsaugoti atsakymo");
+                  }
+                }}
+              >
+                💬 Įrašyti atsakymą
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Pastabos */}
@@ -165,7 +302,16 @@ export default function Perziureti() {
             {ticket.history.map((h, i) => (
               <div key={i} className="border-l-4 border-gray-300 pl-4">
                 <p>
-                  <strong>{h.date?.slice(0, 10)}</strong> – {h.note || h.status}
+                  <strong>
+                    {new Date(h.date).toLocaleString("lt-LT", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </strong>{" "}
+                  ({h.from || "—"}) – {h.note || h.status}
                 </p>
               </div>
             ))}

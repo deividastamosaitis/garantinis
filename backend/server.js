@@ -16,6 +16,7 @@ import GarantinisRouter from "./routes/garantinisRouter.js";
 import AlkotesterisRouter from "./routes/alkotesteriaiRouter.js";
 import RMARouter from "./routes/rmaRouter.js";
 import serviceTicketRoutes from "./routes/serviceTicketRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 //middleware
 import errorHandlerMiddleware from "./middlewares/errorHandlerMiddleware.js";
@@ -45,7 +46,7 @@ app.use(express.static(path.resolve(__dirname, "./public")));
 
 app.use(cookieParser());
 app.use(express.json());
-app.use("/uploads", express.static(path.join("public/uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 app.use("/api/prekes", authenticateUser, PrekeRouter);
 app.use("/api/users", authenticateUser, userRouter);
@@ -54,6 +55,7 @@ app.use("/api/garantinis", GarantinisRouter);
 app.use("/api/alkotesteriai", authenticateUser, AlkotesterisRouter);
 app.use("/api/rma", authenticateUser, RMARouter);
 app.use("/api/auth", authRouter);
+app.use("/api/uploads", uploadRoutes);
 app.use("/api/tickets", serviceTicketRoutes);
 
 app.get("/test-email", async (req, res) => {

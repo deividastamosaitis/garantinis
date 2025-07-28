@@ -38,8 +38,11 @@ const ServiceTicketSchema = new mongoose.Schema({
     type: String,
     enum: [
       "Užregistruota",
+      "Laukiama prekė iš kliento",
       "Prekė gauta į servisą",
+      "Laukiama papildoma informacija iš kliento",
       "Diagnostika",
+      "Išsiųsta į autorizuotą servisą",
       "Dalių užsakymas",
       "Remontuojama",
       "Paruošta atsiėmimui",
@@ -48,11 +51,16 @@ const ServiceTicketSchema = new mongoose.Schema({
     ],
     default: "Naujas",
   },
+  attachments: {
+    type: [String],
+    default: [],
+  },
   history: [
     {
       status: String,
       date: { type: Date, default: Date.now },
       note: String,
+      from: String,
     },
   ],
   assignedTo: String,
