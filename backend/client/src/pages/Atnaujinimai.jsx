@@ -7,6 +7,20 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 08 04",
+      type: "Atnaujinimas",
+      title: "Garantiniu ir serviso UPDATE",
+      description: "UPDAIT",
+      highlights: [
+        "Galima atsisiųst excel garantiniu prekes, kad Vidas galėtų įrašyt daugiau kamerų jei reikia.",
+        "Servise galima suvesti papildomą raktažodį (matosi tik mum) dėl greitesnės filtracijos",
+        "Serviso lentelėje galima greičiau atsifiltruot su raktažodžiu (matomas tik mum)",
+        "Serviso užklausų istorija saugoja iki 5 žinučių",
+        "Kiekvienam RMA sukuriamas QR kodas, jį nuskanavus nukeliauji tiesiogiai į peržiūros puslapi (tereik būt tam pačiam tinkle).",
+      ],
+    },
+    {
+      id: 1,
       date: "2025 06 23",
       type: "Atnaujinimas",
       title: "Garantinių redagavimas",
@@ -106,7 +120,7 @@ const Atnaujinimai = () => {
                   {update.highlights && update.highlights.length > 0 && (
                     <div className="mt-5">
                       <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                        Pataisyta:
+                        Padaryta:
                       </h3>
                       <ul className="space-y-2">
                         {update.highlights.map((highlight, index) => (

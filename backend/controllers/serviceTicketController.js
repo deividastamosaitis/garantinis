@@ -60,6 +60,7 @@ export const updateServiceTicket = async (req, res) => {
     "product.category": "Kategorija",
     "product.brand": "Gamintojas",
     "product.model": "Modelis",
+
     "product.serialNumber": "Serijos numeris",
     "product.externalService.sentTo": "Tiekėjas",
     "product.externalService.sentDate": "Išsiuntimo data",
@@ -68,6 +69,7 @@ export const updateServiceTicket = async (req, res) => {
     "product.externalService.status": "Išorinio serviso statusas",
     "product.externalService.returnDate": "Grąžinimo data",
     problemDescription: "Gedimo aprašymas",
+    keyword: "Raktažodis",
     status: "Statusas",
     assignedTo: "Darbuotojas",
     notes: "Pastabos",
@@ -219,6 +221,16 @@ export const updateServiceTicket = async (req, res) => {
         });
         ticket.attachments = newVal;
       }
+    }
+
+    // ✅ Raktažodis
+    if (update.keyword !== undefined && update.keyword !== ticket.keyword) {
+      changes.push({
+        field: "keyword",
+        old: ticket.keyword,
+        new: update.keyword,
+      });
+      ticket.keyword = update.keyword;
     }
 
     // ✅ Į istoriją įrašom visas reikšmingas korekcijas

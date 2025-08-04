@@ -309,6 +309,18 @@ const EditGarantinis = () => {
             <h3 className="text-lg font-semibold">Prekės:</h3>
             <button
               type="button"
+              className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+              onClick={() => {
+                window.open(
+                  `/api/garantinis/${garantinis._id}/excel`,
+                  "_blank"
+                );
+              }}
+            >
+              📥 Atsisiųsti Excel
+            </button>
+            <button
+              type="button"
               onClick={addPreke}
               className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
               disabled={isSubmitting}

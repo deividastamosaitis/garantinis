@@ -315,6 +315,17 @@ export default function Redaguoti() {
           />
         </div>
 
+        {/* Raktazodis */}
+        <div>
+          <label className="block font-semibold mb-1">Raktažodis</label>
+          <input
+            name="keyword"
+            defaultValue={ticket.keyword || ""}
+            className="input"
+            placeholder="Pvz.: paminėta garantija, specifinė sąlyga..."
+          />
+        </div>
+
         {/* Išorinis servisas */}
         <fieldset className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <legend className="font-semibold col-span-full">

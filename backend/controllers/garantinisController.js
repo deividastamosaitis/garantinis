@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import Prekes from "../models/PrekeModel.js";
 import { generateGarantinisPDF } from "../utils/pdfGenerator.js";
 import { atidarytiGarantiniPasirasymui } from "../utils/fullyKiosk.js";
+import ExcelJS from "exceljs";
 
 export const getAllGarantinis = async (req, res) => {
   const garantinis = await Garantinis.find({})
@@ -610,5 +611,90 @@ export const resendGarantinisSignature = async (req, res) => {
   } catch (err) {
     console.error("❌ Klaida siunčiant pakartotinai:", err);
     res.status(500).json({ success: false, message: "Serverio klaida" });
+  }
+};
+
+export const downloadGarantinisExcel = async (req, res) => {
+  try {
+    const garantinis = await Garantinis.findById(req.params.id);
+    if (!garantinis) {
+      return res.status(404).json({ msg: "Garantinis nerastas" });
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Garantinis");
+
+    const borderStyle = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+
+    const centerStyle = {
+      vertical: "middle",
+      horizontal: "center",
+    };
+
+    // Kliento duomenys viršuje
+    sheet.addRow(["Vardas:", garantinis.klientas.vardas || ""]);
+    sheet.addRow(["Telefonas:", garantinis.klientas.telefonas || ""]);
+    sheet.addRow([]); // tuščia eilutė
+
+    // Prekių antraštės
+    const headerRow = sheet.addRow([
+      "Barkodas",
+      "Pavadinimas",
+      "Serijos numeris",
+    ]);
+    headerRow.font = { bold: true };
+
+    // Prekės
+    garantinis.prekes.forEach((preke) => {
+      sheet.addRow([
+        preke.barkodas || "",
+        preke.pavadinimas || "",
+        preke.serial || "",
+      ]);
+    });
+
+    // ➕ 3–4 tuščios eilutės rankiniam įrašymui
+    const numEmptyRows = 4;
+    for (let i = 0; i < numEmptyRows; i++) {
+      sheet.addRow(["", "", ""]);
+    }
+
+    // Pritaikome stilių visoms užpildytoms eilutėms (taip pat ir tuščioms)
+    sheet.eachRow({ includeEmpty: false }, (row) => {
+      row.eachCell((cell) => {
+        cell.border = borderStyle;
+        cell.alignment = centerStyle;
+      });
+    });
+
+    // Automatinis stulpelių plotis
+    sheet.columns.forEach((column) => {
+      let maxLength = 10;
+      column.eachCell({ includeEmpty: true }, (cell) => {
+        const length = cell.value?.toString().length || 0;
+        if (length > maxLength) maxLength = length;
+      });
+      column.width = maxLength + 2;
+    });
+
+    // Atsisiuntimo nustatymai
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=garantinis_${garantinis._id}.xlsx`
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    res.status(500).json({ msg: "Klaida generuojant Excel", error });
   }
 };

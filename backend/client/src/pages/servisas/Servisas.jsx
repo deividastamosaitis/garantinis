@@ -15,6 +15,7 @@ export async function loader({ request }) {
       : true;
     const phoneMatch = phone ? item.client.phone?.includes(phone) : true;
     const snMatch = sn ? item.product.serialNumber?.includes(sn) : true;
+
     return rmaMatch && phoneMatch && snMatch;
   });
 }
@@ -43,7 +44,7 @@ export default function Servisas() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 max-w-8xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">🛠️ Serviso įrašai</h1>
 
       {/* Filtravimas */}
@@ -104,6 +105,7 @@ export default function Servisas() {
               <th className="px-4 py-2 border-b text-left">Modelis</th>
               <th className="px-4 py-2 border-b text-left">SN</th>
               <th className="px-4 py-2 border-b text-left">RMA</th>
+              <th className="px-4 py-2 border-b text-left">Raktažodis</th>
               <th className="px-4 py-2 border-b text-left">Statusas</th>
               <th className="px-4 py-2 border-b text-left">Veiksmai</th>
             </tr>
@@ -134,6 +136,7 @@ export default function Servisas() {
                 <td className="px-4 py-2 font-mono text-sm">
                   {r.product?.externalService?.rmaCode || "—"}
                 </td>
+                <td className="px-4 py-2">{r.keyword || "—"}</td>
                 <td className="px-4 py-2">
                   <span
                     className={`inline-block px-2 py-1 rounded text-xs font-semibold ${

@@ -32,6 +32,7 @@ const ServiceTicketSchema = new mongoose.Schema({
     serialNumber: String,
     externalService: ExternalServiceSchema, // ← čia nauja dalis
   },
+  keyword: { type: String },
   problemDescription: String,
   receivedDate: { type: Date, default: Date.now },
   status: {

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useLoaderData, Link } from "react-router-dom";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
+import { QRCodeCanvas } from "qrcode.react";
 
 export async function loader({ params }) {
   try {
@@ -38,20 +39,21 @@ export default function Perziureti() {
   }
 
   const [clientReply, setClientReply] = useState("");
-  const lastInquiryIndex = [...(ticket.history || [])]
-    .reverse()
-    .findIndex((h) => h.note?.startsWith("Išsiųsta užklausa klientui"));
-
-  const reversedHistory = [...(ticket.history || [])].reverse();
-  const lastInquiry =
-    lastInquiryIndex !== -1 ? reversedHistory[lastInquiryIndex] : null;
-  const lastReply =
-    lastInquiryIndex !== -1 ? reversedHistory[lastInquiryIndex - 1] : null;
+  const communicationHistory = [...(ticket.history || [])]
+    .filter(
+      (entry) =>
+        entry.note?.toLowerCase().includes("užklausa klientui") ||
+        entry.note?.toLowerCase().includes("kliento atsakymas")
+    )
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
   const statusColor = statusColors[ticket.status] || "bg-gray-300";
   const [showInquiry, setShowInquiry] = useState(false);
   const [inquiryText, setInquiryText] = useState("");
   const [sending, setSending] = useState(false);
   const { id } = useParams();
+  const location = useLocation();
+  const fullUrl = `${window.location.origin}${location.pathname}`;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8">
@@ -96,6 +98,14 @@ export default function Perziureti() {
             {ticket.problemDescription || "—"}
           </p>
         </div>
+
+        {/* Raktazodis */}
+        {ticket.keyword && (
+          <div className="bg-white shadow rounded p-4 border">
+            <h2 className="font-semibold text-lg mb-2">🔑 Raktažodis</h2>
+            <p>{ticket.keyword}</p>
+          </div>
+        )}
 
         {/* Statusas */}
         <div className="bg-white shadow rounded p-4 border">
@@ -199,33 +209,42 @@ export default function Perziureti() {
             </div>
           )}
 
-          {lastInquiry && (
-            <div className="text-sm text-gray-700 border-l-4 border-yellow-300 pl-3 py-2 mt-1 bg-yellow-50 rounded">
-              <strong>Paskutinė užklausa:</strong>
-              <br />
-              <span className="whitespace-pre-wrap">{lastInquiry.note}</span>
-              <br />
-              <small className="text-xs text-gray-500">
-                {new Date(lastInquiry.date).toLocaleString("lt-LT")} (
-                {lastInquiry.from || "—"})
-              </small>
+          {communicationHistory.map((entry, index) => {
+            const isInquiry = entry.note
+              ?.toLowerCase()
+              .includes("užklausa klientui");
+            const isReply = entry.note
+              ?.toLowerCase()
+              .includes("kliento atsakymas");
 
-              {lastReply && (
-                <div className="mt-3 border-t pt-2">
-                  <strong>Kliento atsakymas:</strong>
-                  <br />
-                  <span className="whitespace-pre-wrap">{lastReply.note}</span>
-                  <br />
-                  <small className="text-xs text-gray-500">
-                    {new Date(lastReply.date).toLocaleString("lt-LT")} (
-                    {lastReply.from || "—"})
-                  </small>
-                </div>
-              )}
-            </div>
-          )}
+            return (
+              <div
+                key={index}
+                className={`border-l-4 pl-3 py-2 rounded ${
+                  isInquiry
+                    ? "bg-yellow-50 border-yellow-400"
+                    : isReply
+                    ? "bg-purple-50 border-purple-500"
+                    : "bg-gray-100 border-gray-300"
+                }`}
+              >
+                <strong>
+                  {isInquiry
+                    ? "Užklausa klientui"
+                    : isReply
+                    ? "Kliento atsakymas"
+                    : "Kita žinutė"}
+                </strong>
+                <p className="whitespace-pre-wrap mt-1">{entry.note}</p>
+                <small className="text-xs text-gray-500 block mt-1">
+                  {new Date(entry.date).toLocaleString("lt-LT")} (
+                  {entry.from || "—"})
+                </small>
+              </div>
+            );
+          })}
 
-          {lastInquiry && (
+          {communicationHistory.length > 0 && (
             <div className="mt-2 space-y-2">
               <textarea
                 rows={3}
@@ -318,6 +337,13 @@ export default function Perziureti() {
           </div>
         </div>
       )}
+
+      {/* QR kodas */}
+      <div className="bg-white shadow rounded p-4 border">
+        <h2 className="font-semibold text-lg mb-2">📱 QR kodas</h2>
+        <p className="text-sm text-gray-600 mb-2"></p>
+        <QRCodeCanvas value={fullUrl} size={128} />
+      </div>
 
       {/* Veiksmai */}
       <div className="flex gap-4">
