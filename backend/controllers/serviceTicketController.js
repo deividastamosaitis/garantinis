@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/UserModel.js";
 import ServiceTicket from "../models/ServiceTicket.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import nodemailer from "nodemailer";
 import axios from "axios";
 
 function generateRmaCode() {
@@ -60,7 +61,6 @@ export const updateServiceTicket = async (req, res) => {
     "product.category": "Kategorija",
     "product.brand": "Gamintojas",
     "product.model": "Modelis",
-
     "product.serialNumber": "Serijos numeris",
     "product.externalService.sentTo": "Tiekėjas",
     "product.externalService.sentDate": "Išsiuntimo data",
@@ -79,7 +79,6 @@ export const updateServiceTicket = async (req, res) => {
   let editorName = "Nežinomas";
 
   try {
-    // ✅ Gauti vartotojo vardą iš JWT
     const token = req.cookies?.token;
     if (token) {
       const { userId } = jwt.verify(token, process.env.JWT_SECRET);
@@ -93,7 +92,7 @@ export const updateServiceTicket = async (req, res) => {
     const update = req.body;
     const changes = [];
 
-    // ✅ Klientas
+    // Klientas
     if (update.client) {
       for (const key in update.client) {
         const oldVal = ticket.client[key];
@@ -105,7 +104,7 @@ export const updateServiceTicket = async (req, res) => {
       }
     }
 
-    // ✅ Produktas
+    // Produktas
     if (update.product) {
       for (const key in update.product) {
         if (key === "externalService" && update.product.externalService) {
@@ -153,7 +152,7 @@ export const updateServiceTicket = async (req, res) => {
       }
     }
 
-    // ✅ Gedimo aprašymas
+    // Gedimo aprašymas
     if (
       update.problemDescription !== undefined &&
       update.problemDescription !== ticket.problemDescription
@@ -166,7 +165,7 @@ export const updateServiceTicket = async (req, res) => {
       ticket.problemDescription = update.problemDescription;
     }
 
-    // ✅ Statusas
+    // Statusas
     if (update.status && update.status !== ticket.status) {
       changes.push({
         field: "status",
@@ -175,20 +174,25 @@ export const updateServiceTicket = async (req, res) => {
       });
       ticket.status = update.status;
 
-      // El. laiškas klientui (jei yra el. paštas)
+      // El. laiškas klientui (tik jei yra adresas)
       if (ticket.client?.email) {
-        const rma = ticket.product?.externalService?.rmaCode || "nežinomas";
+        const rmaCode =
+          ticket.product?.externalService?.rmaCode &&
+          ticket.product?.externalService?.rmaCode.trim() !== ""
+            ? ticket.product.externalService.rmaCode
+            : null;
+
         await sendEmail({
           to: ticket.client.email,
-          rmaCode: rma,
-          status: update.status,
+          rmaCode: rmaCode || null,
+          status: update.status || "Nežinomas",
           product: ticket.product,
           problemDescription: ticket.problemDescription,
         });
       }
     }
 
-    // ✅ Darbuotojas
+    // Darbuotojas
     if (update.assignedTo && update.assignedTo !== ticket.assignedTo) {
       changes.push({
         field: "assignedTo",
@@ -198,7 +202,7 @@ export const updateServiceTicket = async (req, res) => {
       ticket.assignedTo = update.assignedTo;
     }
 
-    // ✅ Pastabos
+    // Pastabos
     if (update.notes && update.notes !== ticket.notes) {
       changes.push({
         field: "notes",
@@ -208,7 +212,7 @@ export const updateServiceTicket = async (req, res) => {
       ticket.notes = update.notes;
     }
 
-    // ✅ Prisegti failai (attachments)
+    // Priedai
     if (Array.isArray(update.attachments)) {
       const old = ticket.attachments || [];
       const newVal = update.attachments;
@@ -223,7 +227,7 @@ export const updateServiceTicket = async (req, res) => {
       }
     }
 
-    // ✅ Raktažodis
+    // Raktažodis
     if (update.keyword !== undefined && update.keyword !== ticket.keyword) {
       changes.push({
         field: "keyword",
@@ -233,7 +237,7 @@ export const updateServiceTicket = async (req, res) => {
       ticket.keyword = update.keyword;
     }
 
-    // ✅ Į istoriją įrašom visas reikšmingas korekcijas
+    // Į istoriją
     for (const c of changes) {
       const fieldLabel = FIELD_LABELS[c.field] || c.field;
       ticket.history.push({
@@ -391,5 +395,55 @@ export const addClientReply = async (req, res) => {
   } catch (err) {
     console.error("❌ Klaida saugant atsakymą:", err.message);
     res.status(500).json({ error: "Nepavyko išsaugoti atsakymo" });
+  }
+};
+
+export const sendToRMTools = async (req, res) => {
+  try {
+    const ticket = await ServiceTicket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: "Įrašas nerastas" });
+
+    const { message, subject } = req.body;
+
+    // Tema – iš popup, jei tuščia, minimalus default
+    const emailSubject =
+      (subject && subject.trim()) ||
+      `Robotas – naujas bilietas: ${ticket.product?.serialNumber || ""}`;
+
+    // Turinys – tik tai, ką įvedi popup’e (kaip HTML)
+    const emailHtml =
+      (message || "").trim().length > 0 ? message.replace(/\n/g, "<br>") : "—";
+
+    // SMTP iš .env
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT, 10),
+      secure: String(process.env.EMAIL_SECURE).toLowerCase() === "true",
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    });
+
+    // Siunčiam: gavėjas hardcodintas + CC
+    const sendResult = await transporter.sendMail({
+      from: `"GPSmeistras Servisas" <${process.env.EMAIL_USER}>`,
+      to: "dck@rmtools.eu", //
+      cc: "deividas@gpsmeistras.lt", // CC
+      subject: emailSubject,
+      html: emailHtml,
+    });
+    console.log("✅ RMTools laiškas:", sendResult.messageId);
+
+    // Istorija (neliečiam jokių kitų laukų)
+    ticket.history.push({
+      date: new Date(),
+      type: "external-send",
+      from: "Sistema",
+      note: `Siųsta į RMTools (${emailSubject})`,
+    });
+    await ticket.save({ validateBeforeSave: false });
+
+    res.json({ msg: "Išsiųsta į RMTools" });
+  } catch (err) {
+    console.error("❌ Siuntimo į RMTools klaida:", err.message);
+    res.status(500).json({ error: "Nepavyko išsiųsti" });
   }
 };

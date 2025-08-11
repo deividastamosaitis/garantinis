@@ -7,6 +7,23 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 08 12",
+      type: "Atnaujinimas",
+      title: "Servisu update",
+      description: "papildomi mygtukai, filtracijos, pagražinta",
+      highlights: [
+        "Serviso peržiūros puslapyje atsirado mygtukas 'Siųsti į RMTools', nuo šiol nebereikia rašyti ranka laiškų :) (pridėtas yra prie kiekvieno siuntimo deividas@gpsmeistras.lt paštas papildomai) .",
+        "Paspaudus mygtuką 'Siųsti į RMTools' iššoką langas su užpildyto serviso informacija, ją galima keisti, papildyti, trinti.",
+        "SVARBU!! NUOTRAUKOS ar VAIZDO ĮRAŠAI prie laiško automatiškai neprisideda, tad išsiunčiam į RMTools laukiam kol susikuria bilietas ir įkeliam rankiniu būdu, taip pat nepamirštam pakoreguoti 'Išorinio serviso' skilties",
+        "Nuo šiol nuotraukos/vaizdo įrašai rodomi thumbnail dydžiu, paspaudus ant jų tik tuomet padidėja. (galima ir su rodyklėm ant klaviatūros pereidinėti per įrašus)",
+        "Pakeistas patogesnis (mano nuomonę) serviso peržiūros puslapio dizainas, švaresnis (ačiū ChatGPT), reikalingesnė informacija perkelta į viršutinę dalį.",
+        "Įdėta serviso puslapyje filtracija su filtravimo mygtukais (skliausteliuose rodo tų kategorijų įrašų skaičių)",
+        "Serviso puslapyje 'Uždaryti' statusą turintys įrašai keliauja į apačią (nebesimaišo tarp vis dar vykdomų)",
+        "Žyyyymiaai labiau pajudėta su užklausų siuntimais klientui, manau greitu metu pašto nebereiks :D",
+      ],
+    },
+    {
+      id: 1,
       date: "2025 08 04",
       type: "Atnaujinimas",
       title: "Garantiniu ir serviso UPDATE",

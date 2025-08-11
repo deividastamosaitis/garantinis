@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
-import { useLoaderData, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useLocation, Link, useLoaderData } from "react-router-dom";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import { QRCodeCanvas } from "qrcode.react";
@@ -15,7 +14,6 @@ export async function loader({ params }) {
   }
 }
 
-// 💡 Statuso spalva
 const statusColors = {
   Naujas: "bg-gray-400",
   Diagnostika: "bg-yellow-500",
@@ -28,17 +26,22 @@ const statusColors = {
 export default function Perziureti() {
   const ticket = useLoaderData();
   const [urlError, setUrlError] = useState({});
-
-  function getMediaUrl(name) {
-    const clientServer = import.meta.env.VITE_FILE_SERVER_URL;
-    const internalServer = import.meta.env.VITE_INTERNAL_FILE_SERVER_URL;
-
-    return urlError[name]
-      ? `${clientServer}/uploads/${name}`
-      : `${internalServer}/uploads/${name}`;
-  }
-
   const [clientReply, setClientReply] = useState("");
+  const [showInquiry, setShowInquiry] = useState(false);
+  const [inquiryText, setInquiryText] = useState("");
+  const [sending, setSending] = useState(false);
+  const { id } = useParams();
+  const location = useLocation();
+  const fullUrl = `${window.location.origin}${location.pathname}`;
+  const [showRMTools, setShowRMTools] = useState(false);
+  const [rmtoolsSubject, setRmtoolsSubject] = useState(
+    `Robotas – naujas bilietas: ${ticket.product?.serialNumber || ""}`
+  );
+  const [rmtoolsMessage, setRmtoolsMessage] = useState("");
+  const [previewIndex, setPreviewIndex] = useState(null);
+
+  const attachments = ticket.attachments || [];
+
   const communicationHistory = [...(ticket.history || [])]
     .filter(
       (entry) =>
@@ -47,18 +50,43 @@ export default function Perziureti() {
     )
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
+
+  function getMediaUrl(name) {
+    const clientServer = import.meta.env.VITE_FILE_SERVER_URL;
+    const internalServer = import.meta.env.VITE_INTERNAL_FILE_SERVER_URL;
+    return urlError[name]
+      ? `${clientServer}/uploads/${name}`
+      : `${internalServer}/uploads/${name}`;
+  }
+
   const statusColor = statusColors[ticket.status] || "bg-gray-300";
-  const [showInquiry, setShowInquiry] = useState(false);
-  const [inquiryText, setInquiryText] = useState("");
-  const [sending, setSending] = useState(false);
-  const { id } = useParams();
-  const location = useLocation();
-  const fullUrl = `${window.location.origin}${location.pathname}`;
+
+  // ESC uždarymui
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setPreviewIndex(null);
+      }
+      if (e.key === "ArrowRight") {
+        setPreviewIndex((prev) =>
+          prev !== null && prev < attachments.length - 1 ? prev + 1 : prev
+        );
+      }
+      if (e.key === "ArrowLeft") {
+        setPreviewIndex((prev) =>
+          prev !== null && prev > 0 ? prev - 1 : prev
+        );
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [attachments.length]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="p-6 max-w-6xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold">🔍 Serviso įrašo peržiūra</h1>
 
+      {/* Pagrindinė info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Klientas */}
         <div className="bg-white shadow rounded p-4 border">
@@ -91,6 +119,64 @@ export default function Perziureti() {
           </p>
         </div>
 
+        {/* Išorinis servisas */}
+        <div className="bg-white shadow rounded p-4 border">
+          <h2 className="font-semibold text-lg mb-2">📤 Išorinis servisas</h2>
+          <p>
+            <strong>Tiekėjas:</strong>{" "}
+            {ticket.product?.externalService?.supplier || "—"}
+          </p>
+          <p>
+            <strong>Išsiuntimo data:</strong>{" "}
+            {ticket.product?.externalService?.sentDate
+              ? new Date(
+                  ticket.product.externalService.sentDate
+                ).toLocaleDateString("lt-LT")
+              : "—"}
+          </p>
+          <p>
+            <strong>RMA kodas:</strong>{" "}
+            {ticket.product?.externalService?.rmaCode || "—"}
+          </p>
+          <p>
+            <strong>Tiekėjo RMA kodas:</strong>{" "}
+            {ticket.product?.externalService?.supplierRmaCode || "—"}
+          </p>
+          <p>
+            <strong>Statusas:</strong>{" "}
+            {ticket.product?.externalService?.status || "—"}
+          </p>
+          <p>
+            <strong>Grąžinimo data:</strong>{" "}
+            {ticket.product?.externalService?.returnDate
+              ? new Date(
+                  ticket.product.externalService.returnDate
+                ).toLocaleDateString("lt-LT")
+              : "—"}
+          </p>
+          {ticket.keyword && (
+            <p className="mt-2">
+              <strong>🔑 Raktažodis:</strong> {ticket.keyword}
+            </p>
+          )}
+        </div>
+
+        {/* Statusas + QR */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white shadow rounded p-4 border">
+            <h2 className="font-semibold text-lg mb-2">📌 Statusas</h2>
+            <span
+              className={`inline-block px-3 py-1 text-sm text-white rounded ${statusColor}`}
+            >
+              {ticket.status}
+            </span>
+          </div>
+          <div className="bg-white shadow rounded p-4 border">
+            <h2 className="font-semibold text-lg mb-2">📱 QR kodas</h2>
+            <QRCodeCanvas value={fullUrl} size={96} />
+          </div>
+        </div>
+
         {/* Gedimas */}
         <div className="bg-white shadow rounded p-4 border col-span-full">
           <h2 className="font-semibold text-lg mb-2">⚠️ Gedimo aprašymas</h2>
@@ -99,38 +185,17 @@ export default function Perziureti() {
           </p>
         </div>
 
-        {/* Raktazodis */}
-        {ticket.keyword && (
-          <div className="bg-white shadow rounded p-4 border">
-            <h2 className="font-semibold text-lg mb-2">🔑 Raktažodis</h2>
-            <p>{ticket.keyword}</p>
-          </div>
-        )}
-
-        {/* Statusas */}
-        <div className="bg-white shadow rounded p-4 border">
-          <h2 className="font-semibold text-lg mb-2">📌 Statusas</h2>
-          <span
-            className={`inline-block px-3 py-1 text-sm text-white rounded ${statusColor}`}
-          >
-            {ticket.status}
-          </span>
-        </div>
-
-        {/* Darbuotojas */}
-        <div className="bg-white shadow rounded p-4 border">
-          <h2 className="font-semibold text-lg mb-2">👨‍🔧 Darbuotojas</h2>
-          <p>{ticket.assignedTo || "—"}</p>
-        </div>
-
-        {/* Video ar FOTO */}
-        {ticket.attachments.map((name) => {
+        {/* Priedai thumbnails */}
+        {attachments.map((name, index) => {
           const isImage = name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
           const isVideo = name.match(/\.(mp4|webm|mov|avi)$/i);
           const mediaUrl = getMediaUrl(name);
-
           return (
-            <div key={name} className="border p-2 rounded bg-gray-50">
+            <div
+              key={name}
+              className="border p-2 rounded bg-gray-50 cursor-pointer"
+              onClick={() => setPreviewIndex(index)}
+            >
               {isImage && (
                 <img
                   src={mediaUrl}
@@ -138,7 +203,7 @@ export default function Perziureti() {
                     setUrlError((prev) => ({ ...prev, [name]: true }))
                   }
                   alt={name}
-                  className="max-w-full h-auto rounded"
+                  className="w-32 h-32 object-cover rounded"
                 />
               )}
               {isVideo && (
@@ -147,26 +212,24 @@ export default function Perziureti() {
                   onError={() =>
                     setUrlError((prev) => ({ ...prev, [name]: true }))
                   }
-                  controls
-                  className="w-full rounded"
+                  className="w-32 h-32 object-cover rounded"
+                  muted
                 />
               )}
               {!isImage && !isVideo && (
-                <a
-                  href={mediaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
+                <span className="text-blue-600 underline">
                   Atsisiųsti: {name}
-                </a>
+                </span>
               )}
             </div>
           );
         })}
+      </div>
 
-        {/* Užklausa */}
-        <div className="space-y-2 mt-4">
+      {/* Užklausos + Mygtukai */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        {/* Užklausos */}
+        <div className="space-y-2">
           <button
             onClick={() => setShowInquiry((prev) => !prev)}
             className="btn bg-yellow-400 hover:bg-yellow-500 text-black"
@@ -208,7 +271,6 @@ export default function Perziureti() {
               </button>
             </div>
           )}
-
           {communicationHistory.map((entry, index) => {
             const isInquiry = entry.note
               ?.toLowerCase()
@@ -216,7 +278,6 @@ export default function Perziureti() {
             const isReply = entry.note
               ?.toLowerCase()
               .includes("kliento atsakymas");
-
             return (
               <div
                 key={index}
@@ -243,7 +304,6 @@ export default function Perziureti() {
               </div>
             );
           })}
-
           {communicationHistory.length > 0 && (
             <div className="mt-2 space-y-2">
               <textarea
@@ -263,7 +323,7 @@ export default function Perziureti() {
                     });
                     toast.success("Atsakymas įrašytas");
                     setClientReply("");
-                    window.location.reload(); // arba refetch loader'į
+                    window.location.reload();
                   } catch (err) {
                     toast.error("Nepavyko išsaugoti atsakymo");
                   }
@@ -275,91 +335,120 @@ export default function Perziureti() {
           )}
         </div>
 
-        {/* Pastabos */}
-        <div className="bg-white shadow rounded p-4 border col-span-full">
-          <h2 className="font-semibold text-lg mb-2">📝 Pastabos</h2>
-          <p className="whitespace-pre-wrap">{ticket.notes || "—"}</p>
+        {/* Mygtukai */}
+        <div className="flex flex-col gap-3">
+          <Link
+            to="/garantinis/servisas"
+            className="btn bg-gray-200 text-gray-800 hover:bg-gray-300"
+          >
+            ⬅️ Atgal
+          </Link>
+          <Link
+            to={`/garantinis/servisas/redaguoti/${ticket._id}`}
+            className="btn bg-blue-600 text-white hover:bg-blue-700"
+          >
+            ✏️ Redaguoti
+          </Link>
+          {ticket.product?.category === "Robotas" && (
+            <button
+              onClick={() => setShowRMTools(true)}
+              className="btn bg-red-600 hover:bg-red-700 text-white"
+            >
+              🚀 Siųsti į RMTools
+            </button>
+          )}
         </div>
-
-        {/* Išorinis servisas */}
-        {ticket.product?.externalService?.rmaCode && (
-          <div className="bg-white shadow rounded p-4 border col-span-full">
-            <h2 className="font-semibold text-lg mb-2">🚚 Išorinis servisas</h2>
-            <p>
-              <strong>RMA (klientui):</strong>{" "}
-              {ticket.product.externalService.rmaCode}
-            </p>
-            <p>
-              <strong>Tiekėjo RMA:</strong>{" "}
-              {ticket.product.externalService.supplierRmaCode || "—"}
-            </p>
-            <p>
-              <strong>Siųsta į:</strong>{" "}
-              {ticket.product.externalService.sentTo || "—"}
-            </p>
-            <p>
-              <strong>Siuntimo data:</strong>{" "}
-              {ticket.product.externalService.sentDate?.slice(0, 10) || "—"}
-            </p>
-            <p>
-              <strong>Statusas:</strong>{" "}
-              {ticket.product.externalService.status || "—"}
-            </p>
-            <p>
-              <strong>Grąžinimo data:</strong>{" "}
-              {ticket.product.externalService.returnDate?.slice(0, 10) || "—"}
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* Istorija */}
+      {/* Veiksmų istorija */}
       {ticket.history?.length > 0 && (
         <div className="bg-white shadow rounded p-4 border">
-          <h2 className="font-semibold text-lg mb-4">🕒 Veiksmų istorija</h2>
-          <div className="space-y-2 text-sm">
-            {ticket.history.map((h, i) => (
-              <div key={i} className="border-l-4 border-gray-300 pl-4">
-                <p>
-                  <strong>
-                    {new Date(h.date).toLocaleString("lt-LT", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </strong>{" "}
-                  ({h.from || "—"}) – {h.note || h.status}
-                </p>
-              </div>
-            ))}
+          <h2 className="font-semibold text-lg mb-4">📜 Veiksmų istorija</h2>
+          <div className="space-y-3">
+            {ticket.history
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .map((entry, index) => {
+                const isRMTools = entry.note
+                  ?.toLowerCase()
+                  .includes("siųsta į rmtools");
+                return (
+                  <div
+                    key={index}
+                    className={`border-b pb-2 ${
+                      isRMTools ? "bg-red-100 border-l-4 border-red-500" : ""
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap">{entry.note}</p>
+                    <small className="text-gray-500">
+                      {new Date(entry.date).toLocaleString("lt-LT")} –{" "}
+                      {entry.from || "—"}
+                    </small>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}
 
-      {/* QR kodas */}
-      <div className="bg-white shadow rounded p-4 border">
-        <h2 className="font-semibold text-lg mb-2">📱 QR kodas</h2>
-        <p className="text-sm text-gray-600 mb-2"></p>
-        <QRCodeCanvas value={fullUrl} size={128} />
-      </div>
+      {/* Modal su rodyklėmis */}
+      {previewIndex !== null && attachments[previewIndex] && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setPreviewIndex(null)}
+        >
+          <div
+            className="relative bg-white p-4 rounded shadow-lg max-w-5xl max-h-[90%] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Rodyklės */}
+            {previewIndex > 0 && (
+              <button
+                className="absolute left-2 top-1/2 text-white text-3xl"
+                onClick={() => setPreviewIndex((prev) => prev - 1)}
+              >
+                ◀
+              </button>
+            )}
+            {previewIndex < attachments.length - 1 && (
+              <button
+                className="absolute right-2 top-1/2 text-white text-3xl"
+                onClick={() => setPreviewIndex((prev) => prev + 1)}
+              >
+                ▶
+              </button>
+            )}
 
-      {/* Veiksmai */}
-      <div className="flex gap-4">
-        <Link
-          to="/garantinis/servisas"
-          className="btn bg-gray-200 text-gray-800 hover:bg-gray-300"
-        >
-          ⬅️ Atgal
-        </Link>
-        <Link
-          to={`/garantinis/servisas/redaguoti/${ticket._id}`}
-          className="btn bg-blue-600 text-white hover:bg-blue-700"
-        >
-          ✏️ Redaguoti
-        </Link>
-      </div>
+            {/* Turinys */}
+            {attachments[previewIndex].match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
+              <img
+                src={getMediaUrl(attachments[previewIndex])}
+                alt="Peržiūra"
+                className="max-w-full max-h-[80vh] mx-auto"
+              />
+            )}
+            {attachments[previewIndex].match(/\.(mp4|webm|mov|avi)$/i) && (
+              <video
+                src={getMediaUrl(attachments[previewIndex])}
+                controls
+                autoPlay
+                className="max-w-full max-h-[80vh] mx-auto"
+              />
+            )}
+            {!attachments[previewIndex].match(
+              /\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|avi)$/i
+            ) && (
+              <a
+                href={getMediaUrl(attachments[previewIndex])}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                Atsisiųsti failą
+              </a>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

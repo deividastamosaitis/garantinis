@@ -10,6 +10,7 @@ import {
   updateExternalServiceInfo,
   sendClientInquiry,
   addClientReply,
+  sendToRMTools,
 } from "../controllers/serviceTicketController.js";
 
 import { authenticateUser } from "../middlewares/authMiddleware.js";
@@ -29,6 +30,7 @@ router
 router.post("/public", createServiceTicket);
 router.post("/:id/inquiry", authenticateUser, sendClientInquiry);
 router.post("/:id/inquiry-reply", authenticateUser, addClientReply);
+router.post("/:id/send-to-rmtools", sendToRMTools);
 
 router.patch("/:id/external", authenticateUser, updateExternalServiceInfo);
 

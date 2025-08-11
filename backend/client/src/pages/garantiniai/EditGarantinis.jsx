@@ -164,6 +164,14 @@ const EditGarantinis = () => {
     setAtsiskaitymasData(updated);
   };
 
+  //laikas i vietini
+  const toDatetimeLocal = (value) => {
+    const d = new Date(value);
+    const off = d.getTimezoneOffset(); // min
+    const local = new Date(d.getTime() - off * 60000);
+    return local.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Redaguoti garantinį</h2>
@@ -290,9 +298,7 @@ const EditGarantinis = () => {
           <input
             type="datetime-local"
             name="createdAt"
-            defaultValue={new Date(garantinis.createdAt)
-              .toISOString()
-              .slice(0, 16)}
+            defaultValue={toDatetimeLocal(garantinis.createdAt)}
             className="w-full p-2 border rounded"
             required
           />
