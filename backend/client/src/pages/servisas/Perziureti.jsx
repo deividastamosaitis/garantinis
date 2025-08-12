@@ -35,7 +35,7 @@ export default function Perziureti() {
   const fullUrl = `${window.location.origin}${location.pathname}`;
   const [showRMTools, setShowRMTools] = useState(false);
   const [rmtoolsSubject, setRmtoolsSubject] = useState(
-    `Robotas – naujas bilietas: ${ticket.product?.serialNumber || ""}`
+    `DCK – : ${ticket.product?.serialNumber || ""}`
   );
   const [rmtoolsMessage, setRmtoolsMessage] = useState("");
   const [previewIndex, setPreviewIndex] = useState(null);
@@ -60,6 +60,29 @@ export default function Perziureti() {
   }
 
   const statusColor = statusColors[ticket.status] || "bg-gray-300";
+
+  // Auto užpildymas RMTools popupo
+  useEffect(() => {
+    if (ticket) {
+      setRmtoolsSubject(
+        `${ticket.product?.category || ""} – naujas bilietas: ${
+          ticket.product?.serialNumber || ""
+        }`
+      );
+      setRmtoolsMessage(
+        `📦 Prekė:
+- Kategorija: ${ticket.product?.category || "—"}
+- Gamintojas: ${ticket.product?.brand || "—"}
+- Modelis: ${ticket.product?.model || "—"}
+- Serijos nr.: ${ticket.product?.serialNumber || "—"}
+
+⚠️ Gedimas:
+${ticket.problemDescription || "—"}
+
+`
+      );
+    }
+  }, [ticket, fullUrl]);
 
   // ESC uždarymui
   useEffect(() => {
@@ -446,6 +469,52 @@ export default function Perziureti() {
                 Atsisiųsti failą
               </a>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* RMTools Popup */}
+      {showRMTools && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full space-y-4">
+            <h2 className="text-xl font-bold">🚀 Siųsti į RMTools</h2>
+            <input
+              className="input w-full"
+              value={rmtoolsSubject}
+              onChange={(e) => setRmtoolsSubject(e.target.value)}
+              placeholder="Tema"
+            />
+            <textarea
+              className="input w-full h-40"
+              value={rmtoolsMessage}
+              onChange={(e) => setRmtoolsMessage(e.target.value)}
+              placeholder="Žinutė"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                className="btn bg-gray-300"
+                onClick={() => setShowRMTools(false)}
+              >
+                Atšaukti
+              </button>
+              <button
+                className="btn bg-green-600 text-white"
+                onClick={async () => {
+                  try {
+                    await customFetch.post(`/tickets/${id}/send-to-rmtools`, {
+                      subject: rmtoolsSubject,
+                      message: rmtoolsMessage,
+                    });
+                    toast.success("Išsiųsta į RMTools");
+                    setShowRMTools(false);
+                  } catch (err) {
+                    toast.error("Klaida siunčiant į RMTools");
+                  }
+                }}
+              >
+                Siųsti
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -408,7 +408,7 @@ export const sendToRMTools = async (req, res) => {
     // Tema – iš popup, jei tuščia, minimalus default
     const emailSubject =
       (subject && subject.trim()) ||
-      `Robotas – naujas bilietas: ${ticket.product?.serialNumber || ""}`;
+      `DCK – : ${ticket.product?.serialNumber || ""}`;
 
     // Turinys – tik tai, ką įvedi popup’e (kaip HTML)
     const emailHtml =
