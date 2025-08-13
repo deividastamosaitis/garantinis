@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation, Link, useLoaderData } from "react-router-dom";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
@@ -39,15 +39,26 @@ export default function Perziureti() {
   );
   const [rmtoolsMessage, setRmtoolsMessage] = useState("");
   const [previewIndex, setPreviewIndex] = useState(null);
+  const [clientReplyMsg, setClientReplyMsg] = useState("");
+  const [clientReplySubject, setClientReplySubject] = useState(
+    `Atsakymas dėl RMA – ${ticket.product?.externalService?.rmaCode || ""}`
+  );
+  const [sendingReply, setSendingReply] = useState(false);
 
   const attachments = ticket.attachments || [];
 
   const communicationHistory = [...(ticket.history || [])]
-    .filter(
-      (entry) =>
-        entry.note?.toLowerCase().includes("užklausa klientui") ||
-        entry.note?.toLowerCase().includes("kliento atsakymas")
-    )
+    .filter((entry) => {
+      const n = entry.note?.toLowerCase() || "";
+      return (
+        n.includes("užklausa klientui") ||
+        n.includes("kliento atsakymas") ||
+        n.includes("atsakymas klientui") ||
+        entry.type === "inquiry" ||
+        entry.type === "inquiry-reply" ||
+        entry.type === "client-reply"
+      );
+    })
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 
@@ -104,6 +115,50 @@ ${ticket.problemDescription || "—"}
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [attachments.length]);
+
+  // --- Parašo slėpimas rodinyje ---
+  const SIGNATURE_LINES = [
+    "GPSmeistras Servisas",
+    "UAB Todesa",
+    "Jonavos g. 204A, Kaunas",
+    "+370 37208164",
+  ];
+
+  function stripSignatureFromText(text = "") {
+    const escaped = SIGNATURE_LINES.map(
+      (l) => new RegExp(l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")
+    );
+    return text
+      .split(/\r?\n/)
+      .filter((line) => line.trim() && !escaped.some((re) => re.test(line)))
+      .join("\n")
+      .trim(); // pašalinam tarpus/eilutes gale
+  }
+
+  function htmlToText(html = "") {
+    const el = document.createElement("div");
+    el.innerHTML = html;
+    return (el.textContent || el.innerText || "").replace(/\u00A0/g, " ");
+  }
+
+  function escapeHtml(t = "") {
+    return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function textToHtml(text = "") {
+    return text.split("\n").map(escapeHtml).join("<br>");
+  }
+
+  function stripSignatureFromHtml(html = "") {
+    const txt = htmlToText(html);
+    const cleaned = stripSignatureFromText(txt);
+    const trimmedLines = cleaned
+      .split(/\r?\n/)
+      .filter((line, i, arr) => !(i >= arr.length - 1 && line.trim() === ""))
+      .join("\n");
+
+    return textToHtml(trimmedLines);
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8">
@@ -164,6 +219,63 @@ ${ticket.problemDescription || "—"}
           <p>
             <strong>Tiekėjo RMA kodas:</strong>{" "}
             {ticket.product?.externalService?.supplierRmaCode || "—"}
+            {ticket.product?.externalService?.supplierRmaCode && (
+              <>
+                {/* RMTools (4 skaitmenys) */}
+                {/^\d{4}$/.test(
+                  ticket.product.externalService.supplierRmaCode
+                ) && (
+                  <>
+                    {" "}
+                    <a
+                      href={`https://rmtools.eu/lt/helpdesk/ticket/${ticket.product.externalService.supplierRmaCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      (peržiūrėti RMTools)
+                    </a>
+                  </>
+                )}
+
+                {/* eProma */}
+                {/^RMA_EPR\d+$/i.test(
+                  ticket.product.externalService.supplierRmaCode
+                ) && (
+                  <>
+                    {" "}
+                    <a
+                      href={`https://eproma.lt/lt/module/registerforrepair/status?reference=${ticket.product.externalService.supplierRmaCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      (peržiūrėti Eproma)
+                    </a>
+                  </>
+                )}
+
+                {/* SPM */}
+                {/^RMA-\d+$/i.test(
+                  ticket.product.externalService.supplierRmaCode
+                ) && (
+                  <>
+                    {" "}
+                    <a
+                      href={`https://spm.servisaict.eu/RmasHistory/RmasHistory/Details?rmaNumber=${ticket.product.externalService.supplierRmaCode.replace(
+                        "RMA-",
+                        ""
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      (peržiūrėti ACC)
+                    </a>
+                  </>
+                )}
+              </>
+            )}
           </p>
           <p>
             <strong>Statusas:</strong>{" "}
@@ -249,6 +361,12 @@ ${ticket.problemDescription || "—"}
         })}
       </div>
 
+      {/* Pastabos */}
+      <div className="bg-white shadow rounded p-4 border col-span-full">
+        <h2 className="font-semibold text-lg mb-2">📝 Pastabos</h2>
+        <p className="whitespace-pre-wrap">{ticket.notes || "—"}</p>
+      </div>
+
       {/* Užklausos + Mygtukai */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {/* Užklausos */}
@@ -295,31 +413,60 @@ ${ticket.problemDescription || "—"}
             </div>
           )}
           {communicationHistory.map((entry, index) => {
-            const isInquiry = entry.note
-              ?.toLowerCase()
-              .includes("užklausa klientui");
-            const isReply = entry.note
-              ?.toLowerCase()
-              .includes("kliento atsakymas");
+            const note = entry.note || "";
+            const noteLC = note.toLowerCase();
+
+            const isInquiry =
+              noteLC.includes("užklausa klientui") || entry.type === "inquiry";
+            const isClientReplyIncoming =
+              noteLC.includes("kliento atsakymas") ||
+              entry.type === "inquiry-reply";
+            const isClientReplySent =
+              noteLC.includes("atsakymas klientui") ||
+              entry.type === "client-reply";
+
+            const base = "border-l-4 pl-3 py-2 rounded";
+            const tone = isInquiry
+              ? "bg-yellow-50 border-yellow-400"
+              : isClientReplyIncoming
+              ? "bg-purple-50 border-purple-500"
+              : isClientReplySent
+              ? "bg-blue-50 border-blue-500"
+              : "bg-gray-100 border-gray-300";
+
+            // 🔽 paslėptas parašas tiek tekste, tiek HTML žinutėse
+            const safeNote = stripSignatureFromText(note);
+            const safeHtml = entry.messageHtml
+              ? stripSignatureFromHtml(entry.messageHtml)
+              : null;
+            const safeText =
+              !entry.messageHtml && entry.messageText
+                ? stripSignatureFromText(entry.messageText)
+                : null;
+
             return (
-              <div
-                key={index}
-                className={`border-l-4 pl-3 py-2 rounded ${
-                  isInquiry
-                    ? "bg-yellow-50 border-yellow-400"
-                    : isReply
-                    ? "bg-purple-50 border-purple-500"
-                    : "bg-gray-100 border-gray-300"
-                }`}
-              >
+              <div key={index} className={`${base} ${tone}`}>
                 <strong>
                   {isInquiry
                     ? "Užklausa klientui"
-                    : isReply
+                    : isClientReplyIncoming
                     ? "Kliento atsakymas"
+                    : isClientReplySent
+                    ? "Atsakymas klientui"
                     : "Kita žinutė"}
                 </strong>
-                <p className="whitespace-pre-wrap mt-1">{entry.note}</p>
+
+                <p className="whitespace-pre-wrap mt-1">{safeNote}</p>
+
+                {safeHtml ? (
+                  <div
+                    className="mt-2 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: safeHtml }}
+                  />
+                ) : safeText ? (
+                  <p className="whitespace-pre-wrap mt-2">{safeText}</p>
+                ) : null}
+
                 <small className="text-xs text-gray-500 block mt-1">
                   {new Date(entry.date).toLocaleString("lt-LT")} (
                   {entry.from || "—"})
@@ -357,6 +504,56 @@ ${ticket.problemDescription || "—"}
             </div>
           )}
         </div>
+        {/* Naujas blokas – Atsakyti klientui */}
+        <div className="mt-4 p-3 border rounded bg-blue-50">
+          <h3 className="font-semibold mb-2">Atsakyti klientui</h3>
+          <input
+            type="text"
+            className="input w-full mb-2"
+            value={clientReplySubject}
+            onChange={(e) => setClientReplySubject(e.target.value)}
+            placeholder="Tema"
+          />
+          <textarea
+            rows={4}
+            className="input w-full mb-2"
+            value={clientReplyMsg}
+            onChange={(e) => setClientReplyMsg(e.target.value)}
+            placeholder="Jūsų atsakymas klientui"
+          />
+          <button
+            className="btn bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={!clientReplyMsg.trim() || sendingReply}
+            onClick={async () => {
+              try {
+                setSendingReply(true);
+                const signature = `
+                <br><br>GPSmeistras Servisas,<br>
+                UAB Todesa<br>
+                Jonavos g. 204A, Kaunas<br>
+                +370 37208164
+                `;
+
+                await customFetch.post(`/tickets/${id}/reply-to-client`, {
+                  subject: clientReplySubject,
+                  message: clientReplyMsg + signature,
+                });
+                toast.success("Atsakymas klientui išsiųstas");
+                setClientReplyMsg("");
+                window.location.reload();
+              } catch (err) {
+                toast.error(
+                  err.response?.data?.error ||
+                    "Nepavyko išsiųsti atsakymo klientui"
+                );
+              } finally {
+                setSendingReply(false);
+              }
+            }}
+          >
+            📤 Siųsti atsakymą
+          </button>
+        </div>
 
         {/* Mygtukai */}
         <div className="flex flex-col gap-3">
@@ -384,16 +581,30 @@ ${ticket.problemDescription || "—"}
       </div>
 
       {/* Veiksmų istorija */}
-      {ticket.history?.length > 0 && (
+      {Array.isArray(ticket.history) && ticket.history.length > 0 && (
         <div className="bg-white shadow rounded p-4 border">
           <h2 className="font-semibold text-lg mb-4">📜 Veiksmų istorija</h2>
+
           <div className="space-y-3">
             {ticket.history
+              .slice() // nekoreguojam originalo
               .sort((a, b) => new Date(b.date) - new Date(a.date))
               .map((entry, index) => {
-                const isRMTools = entry.note
-                  ?.toLowerCase()
+                const note = entry.note || "";
+                const isRMTools = note
+                  .toLowerCase()
                   .includes("siųsta į rmtools");
+
+                // Paslepiam parašą rodinyje (bet DB – nekeičiame)
+                const displayNote = stripSignatureFromText(note);
+                const displayHtml = entry.messageHtml
+                  ? stripSignatureFromHtml(entry.messageHtml)
+                  : null;
+                const displayText =
+                  !entry.messageHtml && entry.messageText
+                    ? stripSignatureFromText(entry.messageText)
+                    : null;
+
                 return (
                   <div
                     key={index}
@@ -401,10 +612,26 @@ ${ticket.problemDescription || "—"}
                       isRMTools ? "bg-red-100 border-l-4 border-red-500" : ""
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{entry.note}</p>
-                    <small className="text-gray-500">
-                      {new Date(entry.date).toLocaleString("lt-LT")} –{" "}
-                      {entry.from || "—"}
+                    {/* Pagrindinė pastaba */}
+                    {displayNote && (
+                      <p className="whitespace-pre-wrap">{displayNote}</p>
+                    )}
+
+                    {/* Jei saugoji papildomą HTML ar tekstą – parodom po pastaba */}
+                    {displayHtml ? (
+                      <div
+                        className="mt-2 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: displayHtml }}
+                      />
+                    ) : displayText ? (
+                      <p className="whitespace-pre-wrap mt-2">{displayText}</p>
+                    ) : null}
+
+                    <small className="text-gray-500 block mt-1">
+                      {entry.date
+                        ? new Date(entry.date).toLocaleString("lt-LT")
+                        : "—"}{" "}
+                      – {entry.from || "—"}
                     </small>
                   </div>
                 );

@@ -7,6 +7,18 @@ const Atnaujinimai = () => {
   const updates = [
     {
       id: 1,
+      date: "2025 08 14",
+      type: "Atnaujinimas",
+      title: "VĖL Servisas UPDATE",
+      description: "RMA nuorodos, atsakymai klientui",
+      highlights: [
+        "Nuo šiol atsakymus/klausimus klientui dėl serviso siunčiam TIK PER SISTEMA, pačiame bilieto viduje yra laukelis: 'atsakyti klientui', parašom žinutę - siunčiam",
+        "Klientas atsakymą mums atrašo TIK Į SERVISAS@GPSMEISTRAS.LT el.paštą, jį nukopijuojam ir įklijuojam į sistemą (kaip ir anksčiau), jei reikia atrašyti - per SISTEMA. servisas@gpsmeistras.lt el.paštą naudojam tik skaitymui",
+        "Pagal 'tiekėjo RMA kodą' šalia kodo atsiranda URL nuorodą, ją paspaudus nukeliauji į tiekėjo RMA puslapi. Lengviau sekti statusus, informacija",
+      ],
+    },
+    {
+      id: 1,
       date: "2025 08 12",
       type: "Atnaujinimas",
       title: "Servisu update",

@@ -366,6 +366,65 @@ Jonavos g. 204A, Kaunas
   }
 };
 
+export const replyToClient = async (req, res) => {
+  try {
+    const ticket = await ServiceTicket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ error: "Įrašas nerastas" });
+
+    const { message, subject } = req.body;
+    if (!message || message.trim().length === 0)
+      return res.status(400).json({ error: "Žinutė negali būti tuščia." });
+
+    if (!ticket.client?.email) {
+      return res
+        .status(400)
+        .json({ error: "Klientas neturi el. pašto adreso." });
+    }
+
+    // Nodemailer SMTP (galima tiesiai hardcodint siuntėją)
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT, 10),
+      secure: String(process.env.EMAIL_SECURE).toLowerCase() === "true",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"GPSmeistras Servisas" <${process.env.EMAIL_USER}>`,
+      to: ticket.client.email,
+      subject:
+        subject ||
+        `Atsakymas dėl RMA – ${ticket.product?.externalService?.rmaCode || ""}`,
+      html: message.replace(/\n/g, "<br>"),
+    });
+
+    // Į istoriją
+    let editorName = "Nežinomas";
+    const token = req.cookies?.token;
+    if (token) {
+      const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(userId).select("vardas email");
+      editorName = user?.vardas || user?.email || "Nežinomas";
+    }
+
+    ticket.history.push({
+      date: new Date(),
+      type: "client-reply-send",
+      from: editorName,
+      note: `Išsiųstas atsakymas klientui: "${message}"`,
+    });
+
+    await ticket.save();
+    res.json({ msg: "Atsakymas klientui išsiųstas" });
+  } catch (err) {
+    console.error("❌ Atsakymo siuntimo klaida:", err.message);
+    res.status(500).json({ error: "Nepavyko išsiųsti atsakymo klientui" });
+  }
+};
+
 export const addClientReply = async (req, res) => {
   try {
     const ticket = await ServiceTicket.findById(req.params.id);

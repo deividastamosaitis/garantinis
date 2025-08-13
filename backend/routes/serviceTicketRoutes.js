@@ -11,6 +11,7 @@ import {
   sendClientInquiry,
   addClientReply,
   sendToRMTools,
+  replyToClient,
 } from "../controllers/serviceTicketController.js";
 
 import { authenticateUser } from "../middlewares/authMiddleware.js";
@@ -29,6 +30,7 @@ router
 
 router.post("/public", createServiceTicket);
 router.post("/:id/inquiry", authenticateUser, sendClientInquiry);
+router.post("/:id/reply-to-client", authenticateUser, replyToClient);
 router.post("/:id/inquiry-reply", authenticateUser, addClientReply);
 router.post("/:id/send-to-rmtools", sendToRMTools);
 
