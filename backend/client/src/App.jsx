@@ -24,6 +24,7 @@ import RedaguotiAlkotesteri from "./pages/RedaguotiAlkotesteri";
 import Pasirasymas from "./pages/garantiniai/Pasirasymas";
 import Laukimas from "./pages/Laukimas";
 import AiBOT from "./pages/AiBOT";
+import Kalakutas from "./pages/Kalakutas";
 
 //SERVISAS
 import Servisas, { loader as servisasLoader } from "./pages/servisas/Servisas";
@@ -76,6 +77,7 @@ import { loader as statistikaLoader } from "./pages/garantiniai/PStatistika";
 import { loader as alkotesteriaiLoader } from "./pages/Alkotesteriai";
 import { loader as alkotesterisLoader } from "./pages/RedaguotiAlkotesteri";
 import Landing from "./pages/Landing";
+import { loader as kalakutasLoader } from "./pages/Kalakutas";
 
 const router = createBrowserRouter([
   {
@@ -229,6 +231,11 @@ const router = createBrowserRouter([
                 action: rmaDeleteAction, // Tik action - OK, nes tai POST/DELETE
               },
             ],
+          },
+          {
+            path: "kalakutas",
+            element: <Kalakutas />,
+            loader: kalakutasLoader,
           },
         ],
       },

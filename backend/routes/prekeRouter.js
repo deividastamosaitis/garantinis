@@ -10,6 +10,7 @@ import {
   deletePreke,
   getPrekeByBarcode,
   createOrUpdatePreke,
+  getPrekesMeta,
 } from "../controllers/prekeController.js";
 import {
   validatePrekeInput,
@@ -22,6 +23,8 @@ router
   .get(getAllPrekes)
   .post(authenticateUser, validatePrekeInput, createPreke);
 
+router.get("/meta", authenticateUser, getPrekesMeta);
+
 router.route("/barcode/:barcode").get(authenticateUser, getPrekeByBarcode);
 
 router
@@ -31,7 +34,7 @@ router
 router
   .route("/:id")
   .get(validateIdParam, getPreke)
-  .patch(validatePrekeInput, validateIdParam, updatePreke)
+  .patch(validateIdParam, updatePreke)
   .delete(validateIdParam, deletePreke);
 
 export default router;

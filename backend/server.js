@@ -17,6 +17,7 @@ import AlkotesterisRouter from "./routes/alkotesteriaiRouter.js";
 import RMARouter from "./routes/rmaRouter.js";
 import serviceTicketRoutes from "./routes/serviceTicketRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 //middleware
 import errorHandlerMiddleware from "./middlewares/errorHandlerMiddleware.js";
@@ -57,6 +58,7 @@ app.use("/api/rma", authenticateUser, RMARouter);
 app.use("/api/auth", authRouter);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/tickets", serviceTicketRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.get("/test-email", async (req, res) => {
   try {
