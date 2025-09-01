@@ -1,4 +1,4 @@
-const fullyBaseURL = "http://192.168.1.22:2323";
+const fullyBaseURL = "http://192.168.1.45:2323";
 const kioskPassword = "1533";
 const frontendIP = "192.168.1.35:4000";
 
