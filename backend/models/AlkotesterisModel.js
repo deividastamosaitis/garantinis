@@ -13,6 +13,8 @@ const AlkotesterisSchema = new mongoose.Schema({
   },
   info: { type: String, required: false },
   lastUpdated: { type: Date, default: Date.now },
+
+  lastSmsSentAt: { type: Date },
 });
 
 const Alkotesteris = mongoose.model("Alkotesteris", AlkotesterisSchema);

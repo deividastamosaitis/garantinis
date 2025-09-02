@@ -10,6 +10,7 @@ import {
   updateAlkotesterisStatus,
   deleteAlkotesteris,
   searchAlkotesteriaiByClient,
+  sendAlkotesterisSms,
 } from "../controllers/alkotesteriaiController.js";
 import { validateAlkotesterisIdParam } from "../middlewares/validationMiddleware.js";
 
@@ -28,5 +29,7 @@ router
   .get(validateAlkotesterisIdParam, getAlkotesteris)
   .patch(validateAlkotesterisIdParam, updateAlkotesteris)
   .delete(validateAlkotesterisIdParam, deleteAlkotesteris);
+
+router.route("/:id/sms").post(validateAlkotesterisIdParam, sendAlkotesterisSms);
 
 export default router;

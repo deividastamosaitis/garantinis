@@ -1,5 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import Alkotesteris from "../models/AlkotesterisModel.js";
+import { sendSms } from "../utils/infobipSms.js";
+import { normalizeLtPhone, isLikelyMobileLt } from "../utils/phone.js";
 
 export const getAllAlkotesteriai = async (req, res) => {
   const { status } = req.query;
@@ -140,5 +142,55 @@ export const searchAlkotesteriaiByClient = async (req, res) => {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: "Klaida vykdant paiešką" });
+  }
+};
+
+export const sendAlkotesterisSms = async (req, res) => {
+  const { id } = req.params;
+
+  const alk = await Alkotesteris.findById(id);
+  if (!alk) {
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: `Alkotesteris su ID ${id} nerastas` });
+  }
+
+  // leidžiam siųsti tik kai "grįžęs"
+  if (alk.status !== "grįžęs") {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "SMS galima siųsti tik kai būsena yra „grįžęs“." });
+  }
+
+  const to = normalizeLtPhone(alk.clientPhone);
+  if (!to || !isLikelyMobileLt(to)) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message:
+        "Neteisingas telefono numeris. Reikalingas LT formatas, pvz.: 3706xxxxxxx",
+    });
+  }
+
+  const text =
+    req.body?.text ||
+    `Sveiki, ${alk.clientName}! Jūsų alkotesteris po patikros jau grįžo ir paruoštas atsiėmimui. Darbo laikas: I-V: 9-18val, VI: 10-15val. Kaunas, Jonavos g. 204a +37037208164`;
+
+  try {
+    const result = await sendSms({ to, text });
+    alk.lastSmsSentAt = new Date();
+    await alk.save();
+    return res.status(StatusCodes.OK).json({
+      message: "SMS sėkmingai išsiųsta",
+      lastSmsSentAt: alk.lastSmsSentAt,
+      result,
+    });
+  } catch (err) {
+    console.error("[Infobip SMS]", err.response?.data || err.message);
+    const status = err.status || err.response?.status || 500;
+    return res.status(status).json({
+      message:
+        err.response?.data?.requestError?.serviceException?.text ||
+        err.message ||
+        "Nepavyko išsiųsti SMS",
+    });
   }
 };
